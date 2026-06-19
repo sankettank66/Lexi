@@ -67,6 +67,7 @@ importScripts(
         return;
       }
 
+      await sendToContent(tab.id, { action: 'saveSelection' });
       await sendToContent(tab.id, { action: 'showLoading' });
 
       const result = await AIAPI.callAI(provider, action, text, apiKey, model);

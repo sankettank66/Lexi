@@ -1,0 +1,226 @@
+#ai-grammar-overlay {
+  position: fixed;
+  z-index: 2147483647;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #e0e0e0;
+  background: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  max-width: 480px;
+  min-width: 320px;
+  padding: 0;
+  overflow: hidden;
+  animation: ai-grammar-fadeIn 0.2s ease-out;
+}
+
+#ai-grammar-overlay * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+@keyframes ai-grammar-fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ai-grammar-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #2a2a2a;
+  border-bottom: 1px solid #333;
+  font-weight: 600;
+  font-size: 13px;
+  color: #ccc;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ai-grammar-header .ai-grammar-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.ai-grammar-header .ai-grammar-dot.fix-grammar { background: #4caf50; }
+.ai-grammar-header .ai-grammar-dot.rephrase { background: #2196f3; }
+
+.ai-grammar-body {
+  padding: 16px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.ai-grammar-section {
+  margin-bottom: 12px;
+}
+
+.ai-grammar-section:last-child {
+  margin-bottom: 0;
+}
+
+.ai-grammar-section-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  margin-bottom: 6px;
+}
+
+.ai-grammar-text {
+  font-size: 14px;
+  line-height: 1.6;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.ai-grammar-text.original {
+  color: #999;
+  text-decoration: line-through;
+}
+
+.ai-grammar-text.corrected {
+  color: #e0e0e0;
+  font-weight: 500;
+}
+
+.ai-grammar-text.diff-insert {
+  background: rgba(76, 175, 80, 0.15);
+  color: #a5d6a7;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+.ai-grammar-text.diff-delete {
+  background: rgba(244, 67, 54, 0.15);
+  color: #ef9a9a;
+  text-decoration: line-through;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+
+.ai-grammar-footer {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #2a2a2a;
+  border-top: 1px solid #333;
+  justify-content: flex-end;
+}
+
+.ai-grammar-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  font-family: inherit;
+}
+
+.ai-grammar-btn:active {
+  transform: scale(0.97);
+}
+
+.ai-grammar-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ai-grammar-btn-primary {
+  background: #4caf50;
+  color: #fff;
+}
+
+.ai-grammar-btn-primary:hover:not(:disabled) {
+  background: #43a047;
+}
+
+.ai-grammar-btn-secondary {
+  background: #555;
+  color: #ccc;
+}
+
+.ai-grammar-btn-secondary:hover:not(:disabled) {
+  background: #666;
+}
+
+.ai-grammar-btn-retry {
+  background: #2196f3;
+  color: #fff;
+}
+
+.ai-grammar-btn-retry:hover:not(:disabled) {
+  background: #1976d2;
+}
+
+.ai-grammar-btn-settings {
+  background: transparent;
+  color: #888;
+  font-size: 12px;
+  padding: 8px 12px;
+}
+
+.ai-grammar-btn-settings:hover {
+  color: #ccc;
+  background: rgba(255,255,255,0.05);
+}
+
+/* Loading spinner */
+.ai-grammar-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  justify-content: center;
+}
+
+.ai-grammar-spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #333;
+  border-top-color: #4caf50;
+  border-radius: 50%;
+  animation: ai-grammar-spin 0.8s linear infinite;
+}
+
+@keyframes ai-grammar-spin {
+  to { transform: rotate(360deg); }
+}
+
+.ai-grammar-loading-text {
+  color: #888;
+  font-size: 14px;
+}
+
+/* Error state */
+.ai-grammar-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px;
+  text-align: center;
+}
+
+.ai-grammar-error-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.ai-grammar-error-title {
+  font-weight: 600;
+  color: #ef9a9a;
+}
+
+.ai-grammar-error-message {
+  color: #999;
+  font-size: 13px;
+}
