@@ -29,8 +29,10 @@
         removeOverlay();
         sendResponse({ ok: true });
         break;
+      default:
+        sendResponse({ ok: false, error: `Unknown action: ${message.action}` });
+        break;
     }
-    return true;
   });
 
   function saveCurrentSelection() {

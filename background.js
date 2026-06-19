@@ -60,7 +60,8 @@ importScripts(
       const settings = await Utils.getSettings();
       const provider = settings.provider || 'openrouter';
       const apiKeys = settings.apiKeys || {};
-      const apiKey = apiKeys[provider];
+      const providerKeys = apiKeys[provider] || {};
+      const apiKey = providerKeys.apiKey || '';
       const model = (settings.model || {})[provider];
       const extraConfig = {};
       const baseUrls = settings.baseUrl || {};
@@ -135,7 +136,8 @@ importScripts(
       const settings = await Utils.getSettings();
       const provider = settings.provider || 'openrouter';
       const apiKeys = settings.apiKeys || {};
-      const apiKey = apiKeys[provider];
+      const providerKeys = apiKeys[provider] || {};
+      const apiKey = providerKeys.apiKey || '';
       const model = (settings.model || {})[provider];
       const extraConfig = {};
       const baseUrls = settings.baseUrl || {};
