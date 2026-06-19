@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Grammar Assistant - Settings</title>
+  <style>
+    :root {
+      --bg: #1a1a1a;
+      --surface: #252525;
+      --surface-hover: #2e2e2e;
+      --border: #333;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --primary: #4caf50;
+      --primary-hover: #43a047;
+      --danger: #ef5350;
+      --warning: #ffa726;
+      --radius: 8px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 32px;
+      max-width: 720px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .subtitle {
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      font-size: 14px;
+    }
+    h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .provider-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .provider-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .provider-name {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .provider-status {
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 12px;
+    }
+    .provider-status.connected { background: rgba(76,175,80,0.2); color: #a5d6a7; }
+    .provider-status.disconnected { background: rgba(255,167,38,0.2); color: #ffcc80; }
+    .provider-status.error { background: rgba(239,83,80,0.2); color: #ef9a9a; }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.15s;
+    }
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .form-group input[type="password"] {
+      font-family: monospace;
+    }
+    .form-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+    }
+    .form-row .form-group {
+      flex: 1;
+      margin-bottom: 0;
+    }
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-secondary {
+      background: var(--surface-hover);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: var(--border); }
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+    .btn-danger:hover { background: #e53935; }
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+    .message {
+      font-size: 13px;
+      margin-top: 6px;
+      min-height: 20px;
+    }
+    .message.success { color: #a5d6a7; }
+    .message.error { color: #ef9a9a; }
+    .message.info { color: #90caf9; }
+    .global-settings {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+      margin-top: 24px;
+    }
+    .hidden { display: none; }
+    .spinner-sm {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .test-result {
+      font-size: 12px;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <h1>AI Grammar Assistant</h1>
+  <p class="subtitle">Configure your AI providers and API keys. Keys are stored locally in your browser.</p>
+
+  <div class="global-settings">
+    <h2>Default Provider</h2>
+    <div class="form-group">
+      <label for="defaultProvider">Choose which AI provider to use by default</label>
+      <select id="defaultProvider">
+        <option value="openrouter">OpenRouter</option>
+        <option value="gemini">Gemini</option>
+        <option value="openai">OpenAI</option>
+        <option value="nvidia">NVIDIA</option>
+        <option value="ollama">Ollama (Local)</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="providerContainers"></div>
+
+  <div class="actions">
+    <button id="saveBtn" class="btn btn-primary">Save Settings</button>
+  </div>
+  <p id="globalMessage" class="message" style="text-align:right"></p>
+
+  <script src="options.js"></script>
+</body>
+</html>

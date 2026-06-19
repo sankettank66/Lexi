@@ -88,9 +88,7 @@ importScripts(
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'tryAgain') {
-      chrome.contextMenus.onClicked.dispatch
-        ? null
-        : handleRetry(sender.tab?.id, message.text, message.menuItemId);
+      handleRetry(sender.tab?.id, message.text, message.menuItemId);
       sendResponse({ ok: true });
       return true;
     }
@@ -100,7 +98,28 @@ importScripts(
       sendResponse({ ok: true });
       return true;
     }
+
+    if (message.action === 'testConnection') {
+      testProviderConnection(message)
+        .then(result => sendResponse({ result }))
+        .catch(err => sendResponse({ error: err.message }));
+      return true;
+    }
   });
+
+  async function testProviderConnection(msg) {
+    const provider = AIAPI.createProvider(
+      msg.provider,
+      msg.apiKey || '',
+      msg.model || undefined
+    );
+
+    if (msg.baseUrl) {
+      provider.baseUrl = msg.baseUrl;
+    }
+
+    return provider.testConnection();
+  }
 
   async function handleRetry(tabId, text, menuItemId) {
     if (!tabId || !text || !menuItemId) return;
