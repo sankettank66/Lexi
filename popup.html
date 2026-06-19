@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Grammar</title>
+  <style>
+    :root {
+      --bg: #1a1a1a;
+      --surface: #252525;
+      --surface-hover: #2e2e2e;
+      --border: #333;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --primary: #4caf50;
+      --radius: 8px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      width: 280px;
+      padding: 16px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .header-icon {
+      width: 24px;
+      height: 24px;
+      background: var(--primary);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    .header-title {
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .header-subtitle {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+      margin-bottom: 4px;
+    }
+    .form-group select {
+      width: 100%;
+      padding: 8px 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .status-dot.connected { background: var(--primary); }
+    .status-dot.disconnected { background: #ffa726; }
+    .status-text {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .btn {
+      padding: 8px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s;
+      text-align: center;
+    }
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: var(--surface-hover); }
+    .btn-link {
+      background: transparent;
+      color: var(--text-muted);
+    }
+    .btn-link:hover { color: var(--text); }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-icon">A</div>
+    <div>
+      <div class="header-title">AI Grammar Assistant</div>
+      <div class="header-subtitle">Select text, right-click, fix</div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="providerSelect">Active Provider</label>
+    <select id="providerSelect">
+      <option value="openrouter">OpenRouter</option>
+      <option value="gemini">Gemini</option>
+      <option value="openai">OpenAI</option>
+      <option value="nvidia">NVIDIA</option>
+      <option value="ollama">Ollama (Local)</option>
+    </select>
+  </div>
+
+  <div class="status">
+    <span class="status-dot" id="statusDot"></span>
+    <span class="status-text" id="statusText">Loading...</span>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn-secondary" id="openOptionsBtn">Open Settings</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
