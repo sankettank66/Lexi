@@ -3,6 +3,7 @@ importScripts(
   'lib/providers/base.js',
   'lib/providers/openrouter.js',
   'lib/providers/gemini.js',
+  'lib/providers/openai.js',
   'lib/api.js'
 );
 
