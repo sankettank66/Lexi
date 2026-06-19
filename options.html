@@ -3,102 +3,91 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Grammar Assistant - Settings</title>
+  <title>AI Grammar Assistant — Settings</title>
   <style>
     :root {
-      --bg: #1a1a1a;
-      --surface: #252525;
-      --surface-hover: #2e2e2e;
-      --border: #333;
-      --text: #e0e0e0;
-      --text-muted: #888;
-      --primary: #4caf50;
-      --primary-hover: #43a047;
-      --danger: #ef5350;
-      --warning: #ffa726;
+      --bg: #0d0d0d;
+      --surface: #1a1a1a;
+      --elevated: #242424;
+      --border: #2e2e2e;
+      --text: #e8e8e8;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+      --accent-green: #10b981;
+      --accent-green-hv: #059669;
+      --accent-blue: #3b82f6;
+      --accent-blue-hv: #2563eb;
+      --accent-amber: #f59e0b;
+      --accent-red: #ef4444;
       --radius: 8px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
       background: var(--bg);
       color: var(--text);
-      padding: 32px;
-      max-width: 720px;
+      padding: 32px 16px;
+      max-width: 640px;
       margin: 0 auto;
       line-height: 1.5;
     }
-    h1 {
-      font-size: 24px;
+    .page-header {
+      margin-bottom: 28px;
+    }
+    .page-title {
+      font-size: 20px;
       font-weight: 700;
-      margin-bottom: 4px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    .subtitle {
-      color: var(--text-muted);
-      margin-bottom: 32px;
+    .page-title-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--accent-green);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
       font-size: 14px;
+      font-weight: 700;
     }
-    h2 {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 16px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border);
+    .page-subtitle {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin-top: 4px;
     }
-    .provider-section {
+    .section-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 20px;
       margin-bottom: 16px;
     }
-    .provider-header {
+    .section-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 16px;
     }
-    .provider-name {
-      font-size: 16px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .provider-status {
-      font-size: 12px;
-      padding: 3px 8px;
-      border-radius: 12px;
-    }
-    .provider-status.connected { background: rgba(76,175,80,0.2); color: #a5d6a7; }
-    .provider-status.disconnected { background: rgba(255,167,38,0.2); color: #ffcc80; }
-    .provider-status.error { background: rgba(239,83,80,0.2); color: #ef9a9a; }
     .form-group {
       margin-bottom: 12px;
     }
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
     .form-group label {
       display: block;
-      font-size: 13px;
-      color: var(--text-muted);
+      font-size: 12px;
+      color: var(--text-secondary);
       margin-bottom: 4px;
-    }
-    .form-group input, .form-group select {
-      width: 100%;
-      padding: 10px 12px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-      font-size: 14px;
-      font-family: inherit;
-      transition: border-color 0.15s;
-    }
-    .form-group input:focus, .form-group select:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
-    .form-group input[type="password"] {
-      font-family: monospace;
+      font-weight: 500;
     }
     .form-row {
       display: flex;
@@ -109,86 +98,153 @@
       flex: 1;
       margin-bottom: 0;
     }
+    input, select {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--accent-green);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+    input[type="password"] { font-family: 'SF Mono', 'Fira Code', monospace; letter-spacing: 1px; }
+    input::placeholder { color: var(--text-muted); }
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 32px;
+    }
     .btn {
-      padding: 10px 20px;
+      padding: 8px 16px;
       border: none;
       border-radius: 6px;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 500;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: background 0.15s, box-shadow 0.15s;
       font-family: inherit;
       white-space: nowrap;
+      line-height: 1.4;
     }
+    .btn:active { transform: scale(0.97); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
     .btn-primary {
-      background: var(--primary);
+      background: var(--accent-green);
       color: #fff;
     }
-    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-green-hv);
+      box-shadow: 0 0 12px rgba(16,185,129,0.25);
+    }
     .btn-secondary {
-      background: var(--surface-hover);
-      color: var(--text);
+      background: var(--elevated);
+      color: var(--text-secondary);
       border: 1px solid var(--border);
     }
-    .btn-secondary:hover { background: var(--border); }
-    .btn-danger {
-      background: var(--danger);
-      color: #fff;
-    }
-    .btn-danger:hover { background: #e53935; }
-    .btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    .btn-secondary:hover:not(:disabled) {
+      background: #2e2e2e;
+      color: var(--text);
     }
     .btn-sm {
       padding: 6px 12px;
-      font-size: 12px;
+      font-size: 11px;
     }
-    .message {
-      font-size: 13px;
-      margin-top: 6px;
-      min-height: 20px;
-    }
-    .message.success { color: #a5d6a7; }
-    .message.error { color: #ef9a9a; }
-    .message.info { color: #90caf9; }
-    .global-settings {
+    .provider-card {
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 20px;
-      margin-bottom: 24px;
+      margin-bottom: 12px;
     }
+    .provider-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .provider-name {
+      font-size: 14px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .provider-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 500;
+    }
+    .provider-badge.ok { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+    .provider-badge.missing { background: rgba(245,158,11,0.15); color: #fcd34d; }
+    .provider-badge.err { background: rgba(239,68,68,0.15); color: #fca5a5; }
+    .message {
+      font-size: 12px;
+      margin-top: 6px;
+      min-height: 18px;
+      line-height: 1.4;
+    }
+    .message.ok { color: #6ee7b7; }
+    .message.err { color: #fca5a5; }
+    .message.info { color: #93c5fd; }
+    .doc-link {
+      color: var(--accent-blue);
+      font-size: 11px;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .doc-link:hover { color: var(--accent-blue-hv); text-decoration: underline; }
     .actions {
       display: flex;
       gap: 8px;
       justify-content: flex-end;
-      margin-top: 24px;
+      margin-top: 8px;
     }
-    .hidden { display: none; }
     .spinner-sm {
       display: inline-block;
       width: 14px;
       height: 14px;
-      border: 2px solid rgba(255,255,255,0.3);
+      border: 2px solid rgba(255,255,255,0.2);
       border-top-color: #fff;
       border-radius: 50%;
       animation: spin 0.6s linear infinite;
       vertical-align: middle;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .test-result {
+    .msg-global {
+      text-align: right;
       font-size: 12px;
-      margin-top: 4px;
+      min-height: 20px;
+    }
+    @media (max-width: 480px) {
+      body { padding: 20px 12px; }
+      .section-card, .provider-card { padding: 16px; }
     }
   </style>
 </head>
 <body>
-  <h1>AI Grammar Assistant</h1>
-  <p class="subtitle">Configure your AI providers and API keys. Keys are stored locally in your browser.</p>
+  <div class="page-header">
+    <div class="page-title">
+      <span class="page-title-icon">A</span>
+      AI Grammar Assistant
+    </div>
+    <p class="page-subtitle">Configure your AI providers. API keys are stored locally in your browser.</p>
+  </div>
 
-  <div class="global-settings">
-    <h2>Default Provider</h2>
+  <div class="section-card">
+    <div class="section-title">
+      <span>Default Provider</span>
+    </div>
     <div class="form-group">
       <label for="defaultProvider">Choose which AI provider to use by default</label>
       <select id="defaultProvider">
@@ -206,7 +262,7 @@
   <div class="actions">
     <button id="saveBtn" class="btn btn-primary">Save Settings</button>
   </div>
-  <p id="globalMessage" class="message" style="text-align:right"></p>
+  <p id="globalMessage" class="msg-global"></p>
 
   <script src="options.js"></script>
 </body>

@@ -1,16 +1,71 @@
 (function () {
-  let savedRange = null;
   let overlay = null;
+
+  const sel = {
+    range: null,
+    element: null,
+    start: 0,
+    end: 0,
+    text: '',
+    type: 'textNode'
+  };
 
   const ACTION_LABELS = {
     'fix-grammar': 'Fix Grammar',
     'rephrase': 'Rephrase'
   };
 
+  /* ── Selection Capture ── */
+  function captureSelection() {
+    const active = document.activeElement;
+    const tag = active?.tagName;
+
+    if (tag === 'INPUT' || tag === 'TEXTAREA') {
+      const start = active.selectionStart;
+      const end = active.selectionEnd;
+      if (start !== null && end !== null && start !== end) {
+        sel.element = active;
+        sel.start = start;
+        sel.end = end;
+        sel.text = active.value.substring(start, end);
+        sel.range = null;
+        sel.type = tag === 'TEXTAREA' ? 'textarea' : 'input';
+        return true;
+      }
+      return false;
+    }
+
+    if (active?.isContentEditable) {
+      const s = window.getSelection();
+      if (s && s.rangeCount > 0 && s.toString().trim()) {
+        sel.element = active;
+        sel.range = s.getRangeAt(0).cloneRange();
+        sel.text = s.toString();
+        sel.type = 'contenteditable';
+        return true;
+      }
+      return false;
+    }
+
+    const s = window.getSelection();
+    if (s && s.rangeCount > 0 && s.toString().trim()) {
+      sel.range = s.getRangeAt(0).cloneRange();
+      sel.text = s.toString();
+      sel.element = null;
+      sel.type = 'textNode';
+      return true;
+    }
+
+    return false;
+  }
+
+  document.addEventListener('contextmenu', captureSelection, true);
+
+  /* ── Message Handler ── */
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     switch (message.action) {
       case 'saveSelection':
-        saveCurrentSelection();
+        captureSelection();
         sendResponse({ ok: true });
         break;
       case 'showLoading':
@@ -30,18 +85,12 @@
         sendResponse({ ok: true });
         break;
       default:
-        sendResponse({ ok: false, error: `Unknown action: ${message.action}` });
+        sendResponse({ ok: false });
         break;
     }
   });
 
-  function saveCurrentSelection() {
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0 && selection.toString().trim()) {
-      savedRange = selection.getRangeAt(0).cloneRange();
-    }
-  }
-
+  /* ── Overlay Management ── */
   function createOverlay() {
     removeOverlay();
     overlay = document.createElement('div');
@@ -59,41 +108,56 @@
   function positionOverlay() {
     if (!overlay) return;
 
-    if (savedRange) {
-      const rect = savedRange.getBoundingClientRect();
-      let top = rect.bottom + window.scrollY + 8;
-      let left = rect.left + window.scrollX;
+    let top, left;
+    const elW = overlay.offsetWidth || 400;
+    const elH = overlay.offsetHeight || 200;
+    const pad = 12;
 
-      if (left + 480 > window.innerWidth - 16) {
-        left = Math.max(16, window.innerWidth - 496);
-      }
-      if (top + overlay.offsetHeight > window.scrollY + window.innerHeight - 16) {
-        top = rect.top + window.scrollY - overlay.offsetHeight - 8;
-      }
-
-      overlay.style.top = `${Math.max(8, top)}px`;
-      overlay.style.left = `${Math.max(8, left)}px`;
+    if (sel.element && (sel.type === 'input' || sel.type === 'textarea')) {
+      const rect = sel.element.getBoundingClientRect();
+      const lineH = parseInt(getComputedStyle(sel.element).lineHeight) || 20;
+      const linesFromTop = sel.text.split('\n').length;
+      const cursorY = rect.top + Math.min(sel.start / (sel.element.value.length || 1), 0.9) * rect.height;
+      top = cursorY + lineH + pad;
+      left = rect.left + pad;
+    } else if (sel.range) {
+      const rect = sel.range.getBoundingClientRect();
+      top = rect.bottom + pad;
+      left = rect.left;
     } else {
-      overlay.style.top = `${window.scrollY + 60}px`;
-      overlay.style.left = `${window.scrollX + Math.max(16, (window.innerWidth - 400) / 2)}px`;
+      top = window.innerHeight / 2 - elH / 2;
+      left = window.innerWidth / 2 - elW / 2;
     }
+
+    if (left + elW + pad > window.innerWidth - pad) {
+      left = Math.max(pad, window.innerWidth - elW - pad);
+    }
+    if (top + elH + pad > window.innerHeight - pad) {
+      top = Math.max(pad, window.innerHeight - elH - pad);
+    }
+
+    overlay.style.top = `${Math.max(pad, top)}px`;
+    overlay.style.left = `${Math.max(pad, left)}px`;
   }
 
+  /* ── Loading ── */
   function showLoadingOverlay() {
     const el = createOverlay();
     el.innerHTML = `
       <div class="ai-grammar-loading">
-        <div class="ai-grammar-spinner"></div>
-        <span class="ai-grammar-loading-text">Processing&hellip;</span>
+        <div class="ai-grammar-loading-dot"></div>
+        <div class="ai-grammar-loading-dot"></div>
+        <div class="ai-grammar-loading-dot"></div>
       </div>
     `;
     positionOverlay();
-    window.addEventListener('scroll', positionOverlay, { once: true });
-    window.addEventListener('resize', positionOverlay, { once: true });
   }
 
+  /* ── Result with Typing Effect ── */
   function showResultOverlay(original, corrected, menuItemId) {
     const label = ACTION_LABELS[menuItemId] || 'AI Grammar';
+    const isRephrase = menuItemId === 'rephrase';
+
     const el = createOverlay();
     el.innerHTML = `
       <div class="ai-grammar-header">
@@ -103,45 +167,92 @@
       <div class="ai-grammar-body">
         <div class="ai-grammar-section">
           <div class="ai-grammar-section-label">Original</div>
-          <div class="ai-grammar-text original">${escapeHtml(original)}</div>
+          <div class="ai-grammar-text original">${esc(original)}</div>
         </div>
         <div class="ai-grammar-section">
-          <div class="ai-grammar-section-label">${label === 'Rephrase' ? 'Rephrased' : 'Corrected'}</div>
-          <div class="ai-grammar-text corrected">${escapeHtml(corrected)}</div>
+          <div class="ai-grammar-section-label">${isRephrase ? 'Rephrased' : 'Corrected'}</div>
+          <div class="ai-grammar-text corrected" id="ai-grammar-corrected-text">
+            <span class="ai-grammar-typing-cursor ${isRephrase ? 'rephrase-mode' : ''}"></span>
+          </div>
         </div>
       </div>
       <div class="ai-grammar-footer">
         <button class="ai-grammar-btn ai-grammar-btn-secondary" data-action="cancel">Cancel</button>
         <button class="ai-grammar-btn ai-grammar-btn-retry" data-action="retry">Try Again</button>
-        <button class="ai-grammar-btn ai-grammar-btn-primary" data-action="accept">Accept</button>
+        <button class="ai-grammar-btn ai-grammar-btn-primary" data-action="accept" disabled>Accept</button>
       </div>
     `;
 
-    el.querySelectorAll('[data-action]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const action = btn.dataset.action;
-        if (action === 'accept') replaceText(corrected);
-        else if (action === 'retry') retry(original, menuItemId);
-        removeOverlay();
-      });
+    el.querySelector('[data-action="cancel"]').addEventListener('click', removeOverlay);
+    el.querySelector('[data-action="retry"]').addEventListener('click', () => {
+      chrome.runtime.sendMessage({ action: 'tryAgain', text: original, menuItemId });
+      removeOverlay();
+    });
+
+    const acceptBtn = el.querySelector('[data-action="accept"]');
+    acceptBtn.addEventListener('click', () => {
+      replaceText(corrected);
+      removeOverlay();
     });
 
     positionOverlay();
-    window.addEventListener('scroll', positionOverlay, { once: true });
-    window.addEventListener('resize', positionOverlay, { once: true });
+
+    typeText(corrected, isRephrase, () => {
+      acceptBtn.disabled = false;
+    });
   }
 
+  /* ── Typing Animation ── */
+  function typeText(text, isRephrase, onDone) {
+    const container = document.getElementById('ai-grammar-corrected-text');
+    if (!container) { onDone(); return; }
+
+    let idx = 0;
+    const baseDelay = 30;
+    const slowDownAt = Math.max(0, text.length - 15);
+    const slowdownDelay = 50;
+
+    const cursor = container.querySelector('.ai-grammar-typing-cursor');
+
+    function tick() {
+      if (idx >= text.length) {
+        if (cursor) cursor.style.display = 'none';
+        onDone();
+        return;
+      }
+
+      const char = text[idx];
+      const isSlow = idx >= slowDownAt;
+      const delay = isSlow ? slowdownDelay : baseDelay;
+
+      if (idx === 0) {
+        container.textContent = '';
+        container.appendChild(document.createTextNode(''));
+        if (cursor) container.appendChild(cursor);
+      }
+
+      const textNode = container.childNodes[0] || container.appendChild(document.createTextNode(''));
+      textNode.textContent += char;
+
+      idx++;
+      setTimeout(tick, delay);
+    }
+
+    tick();
+  }
+
+  /* ── Error ── */
   function showErrorOverlay(message) {
     const el = createOverlay();
     el.innerHTML = `
       <div class="ai-grammar-error">
         <div class="ai-grammar-error-icon">&#9888;</div>
         <div class="ai-grammar-error-title">Error</div>
-        <div class="ai-grammar-error-message">${escapeHtml(message)}</div>
+        <div class="ai-grammar-error-message">${esc(message)}</div>
       </div>
       <div class="ai-grammar-footer">
         <button class="ai-grammar-btn ai-grammar-btn-secondary" data-action="cancel">Close</button>
-        <button class="ai-grammar-btn ai-grammar-btn-settings" data-action="settings">Open Settings</button>
+        <button class="ai-grammar-btn ai-grammar-btn-settings" data-action="settings">Settings</button>
       </div>
     `;
 
@@ -152,59 +263,69 @@
     });
 
     positionOverlay();
-    window.addEventListener('scroll', positionOverlay, { once: true });
-    window.addEventListener('resize', positionOverlay, { once: true });
   }
 
+  /* ── Text Replacement ── */
   function replaceText(newText) {
-    if (!savedRange) {
-      tryReplaceSelection(newText);
+    if (sel.element && (sel.type === 'input' || sel.type === 'textarea')) {
+      const el = sel.element;
+      const before = el.value.substring(0, sel.start);
+      const after = el.value.substring(sel.end);
+      el.value = before + newText + after;
+      try { el.selectionStart = el.selectionEnd = sel.start + newText.length; } catch {}
       return;
     }
 
-    try {
-      const selection = window.getSelection();
-      selection.removeAllRanges();
-      selection.addRange(savedRange);
-
-      const node = savedRange.startContainer;
-      const isInput = node.nodeType === Node.TEXT_NODE &&
-        (node.parentNode?.tagName === 'INPUT' || node.parentNode?.tagName === 'TEXTAREA');
-      const isContentEditable = node.nodeType === Node.TEXT_NODE &&
-        node.parentNode?.isContentEditable;
-
-      if (isInput) {
-        const input = node.parentNode;
-        const start = savedRange.startOffset;
-        const end = savedRange.endOffset;
-        const val = input.value;
-        input.value = val.substring(0, start) + newText + val.substring(end);
-        input.selectionStart = input.selectionEnd = start + newText.length;
-      } else if (isContentEditable) {
-        document.execCommand('insertText', false, newText);
-      } else {
-        if (selection.rangeCount > 0) {
-          selection.getRangeAt(0).deleteContents();
-          selection.getRangeAt(0).insertNode(document.createTextNode(newText));
-        }
-      }
-
-      selection.removeAllRanges();
-    } catch {
-      tryReplaceSelection(newText);
+    if (sel.type === 'contenteditable' && sel.range) {
+      try {
+        const s = window.getSelection();
+        s.removeAllRanges();
+        s.addRange(sel.range);
+        s.getRangeAt(0).deleteContents();
+        s.getRangeAt(0).insertNode(document.createTextNode(newText));
+        s.removeAllRanges();
+        return;
+      } catch {}
     }
+
+    if (sel.range) {
+      try {
+        const s = window.getSelection();
+        s.removeAllRanges();
+        s.addRange(sel.range);
+
+        const node = sel.range.startContainer;
+        if (node.nodeType === 3) {
+          const parent = node.parentNode;
+          if (parent && (parent.tagName === 'INPUT' || parent.tagName === 'TEXTAREA')) {
+            const start = sel.range.startOffset;
+            const end = sel.range.endOffset;
+            const val = parent.value;
+            parent.value = val.substring(0, start) + newText + val.substring(end);
+            return;
+          }
+        }
+
+        s.getRangeAt(0).deleteContents();
+        s.getRangeAt(0).insertNode(document.createTextNode(newText));
+        s.removeAllRanges();
+        return;
+      } catch {}
+    }
+
+    fallbackReplace(newText);
   }
 
-  function tryReplaceSelection(newText) {
+  function fallbackReplace(newText) {
     try {
       const active = document.activeElement;
       if (active) {
-        if (active.tagName === 'INPUT' || active.tagName === 'TEXTAREA') {
+        const tag = active.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA') {
           const start = active.selectionStart;
           const end = active.selectionEnd;
-          if (start !== null && end !== null) {
-            const val = active.value;
-            active.value = val.substring(0, start) + newText + val.substring(end);
+          if (start !== null && end !== null && start !== end) {
+            active.value = active.value.substring(0, start) + newText + active.value.substring(end);
             active.selectionStart = active.selectionEnd = start + newText.length;
             return;
           }
@@ -214,42 +335,26 @@
           return;
         }
       }
-
-      const sel = window.getSelection();
-      if (sel.rangeCount > 0) {
-        sel.getRangeAt(0).deleteContents();
-        sel.getRangeAt(0).insertNode(document.createTextNode(newText));
-        sel.removeAllRanges();
+      const s = window.getSelection();
+      if (s.rangeCount > 0 && s.toString().trim()) {
+        s.getRangeAt(0).deleteContents();
+        s.getRangeAt(0).insertNode(document.createTextNode(newText));
+        s.removeAllRanges();
       }
-    } catch {
-      console.warn('AI Grammar: could not replace text automatically');
-    }
+    } catch {}
   }
 
-  function retry(text, menuItemId) {
-    chrome.runtime.sendMessage({ action: 'tryAgain', text, menuItemId });
-  }
-
-  function escapeHtml(str) {
+  /* ── Helpers ── */
+  function esc(str) {
     if (!str) return '';
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
   }
 
-  document.addEventListener('selectionchange', () => {
-    if (!overlay) {
-      const selection = window.getSelection();
-      if (selection && selection.rangeCount > 0 && selection.toString().trim()) {
-        savedRange = selection.getRangeAt(0).cloneRange();
-      }
-    }
-  });
-
+  /* ── Dismiss Events ── */
   document.addEventListener('mousedown', (e) => {
-    if (overlay && !overlay.contains(e.target)) {
-      removeOverlay();
-    }
+    if (overlay && !overlay.contains(e.target)) removeOverlay();
   });
 
   document.addEventListener('keydown', (e) => {

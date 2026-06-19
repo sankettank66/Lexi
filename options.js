@@ -48,62 +48,56 @@
     }
   ];
 
-  let statusElems = {};
-
   document.addEventListener('DOMContentLoaded', async () => {
-    renderProviderSections();
+    renderProviders();
     await loadSettings();
     document.getElementById('saveBtn').addEventListener('click', saveSettings);
   });
 
-  function renderProviderSections() {
+  function renderProviders() {
     const container = document.getElementById('providerContainers');
     container.innerHTML = '';
 
-    PROVIDERS.forEach(prov => {
-      const section = document.createElement('div');
-      section.className = 'provider-section';
-      section.id = `provider-${prov.key}`;
+    PROVIDERS.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'provider-card';
+      card.id = `provider-${p.key}`;
 
       let fieldsHtml = '';
-      prov.fields.forEach(field => {
+      p.fields.forEach(f => {
         fieldsHtml += `
           <div class="form-group">
-            <label for="${prov.key}-${field.name}">${field.label}</label>
+            <label for="${p.key}-${f.name}">${f.label}</label>
             <div class="form-row">
               <div class="form-group">
-                <input type="${field.type}" id="${prov.key}-${field.name}"
-                  ${field.required ? 'required' : ''}
-                  placeholder="${field.placeholder || ''}"
-                  ${field.name === 'apiKey' ? 'autocomplete="off" spellcheck="false"' : ''}>
+                <input type="${f.type}" id="${p.key}-${f.name}"
+                  ${f.required ? 'required' : ''}
+                  placeholder="${f.placeholder || ''}"
+                  ${f.name === 'apiKey' ? 'autocomplete="off" spellcheck="false"' : ''}>
               </div>
-              ${field.name === 'apiKey' ? `
-                <button class="btn btn-secondary btn-sm test-btn" data-provider="${prov.key}">Test</button>
+              ${f.name === 'apiKey' ? `
+                <button class="btn btn-secondary btn-sm test-btn" data-provider="${p.key}">Test</button>
               ` : ''}
             </div>
           </div>
         `;
       });
 
-      section.innerHTML = `
+      card.innerHTML = `
         <div class="provider-header">
-          <span class="provider-name">${prov.label}</span>
-          <span id="status-${prov.key}" class="provider-status disconnected">Not configured</span>
+          <span class="provider-name">${p.label}</span>
+          <span id="status-${p.key}" class="provider-badge missing">Not configured</span>
         </div>
         ${fieldsHtml}
-        <p id="msg-${prov.key}" class="message"></p>
-        <p class="test-result">
-          <a href="${prov.docUrl}" target="_blank" rel="noopener" style="color:#90caf9;font-size:12px;">
-            Get ${prov.label} API Key &rarr;
-          </a>
-        </p>
+        <p id="msg-${p.key}" class="message"></p>
+        <p><a href="${p.docUrl}" class="doc-link" target="_blank" rel="noopener">Get ${p.label} API Key &rarr;</a></p>
       `;
 
-      container.appendChild(section);
+      container.appendChild(card);
 
-      const testBtn = section.querySelector('.test-btn');
+      const testBtn = card.querySelector('.test-btn');
       if (testBtn) {
-        testBtn.addEventListener('click', () => testConnection(prov.key));
+        testBtn.addEventListener('click', () => testConnection(p.key));
       }
     });
   }
@@ -113,92 +107,63 @@
       chrome.storage.local.get(['apiKeys', 'provider', 'model', 'baseUrl'], resolve);
     });
 
+    document.getElementById('defaultProvider').value = result.provider || 'openrouter';
     const apiKeys = result.apiKeys || {};
-    const provider = result.provider || 'openrouter';
     const models = result.model || {};
     const baseUrls = result.baseUrl || {};
 
-    document.getElementById('defaultProvider').value = provider;
-
-    PROVIDERS.forEach(prov => {
-      const key = prov.key;
-      const providerKeys = apiKeys[key] || {};
-
-      prov.fields.forEach(field => {
-        const el = document.getElementById(`${key}-${field.name}`);
+    PROVIDERS.forEach(p => {
+      const keys = apiKeys[p.key] || {};
+      p.fields.forEach(f => {
+        const el = document.getElementById(`${p.key}-${f.name}`);
         if (!el) return;
-
-        if (field.name === 'apiKey') {
-          el.value = providerKeys.apiKey || '';
-        } else if (field.name === 'model') {
-          el.value = models[key] || '';
-        } else if (field.name === 'baseUrl') {
-          el.value = baseUrls[key] || '';
-        }
+        if (f.name === 'apiKey') el.value = keys.apiKey || '';
+        else if (f.name === 'model') el.value = models[p.key] || '';
+        else if (f.name === 'baseUrl') el.value = baseUrls[p.key] || '';
       });
-
-      updateProviderStatus(key, providerKeys.apiKey);
+      updateBadge(p.key, keys.apiKey);
     });
+  }
+
+  function updateBadge(key, apiKey) {
+    const el = document.getElementById(`status-${key}`);
+    if (!el) return;
+    if (apiKey && apiKey.length > 0) {
+      el.className = 'provider-badge ok';
+      el.textContent = 'Connected';
+    } else {
+      el.className = 'provider-badge missing';
+      el.textContent = 'Not configured';
+    }
   }
 
   async function saveSettings() {
     const apiKeys = {};
     const models = {};
     const baseUrls = {};
-    let allValid = true;
 
-    PROVIDERS.forEach(prov => {
-      const key = prov.key;
-      const providerData = {};
-
-      prov.fields.forEach(field => {
-        const el = document.getElementById(`${key}-${field.name}`);
+    PROVIDERS.forEach(p => {
+      const data = {};
+      p.fields.forEach(f => {
+        const el = document.getElementById(`${p.key}-${f.name}`);
         if (!el) return;
-
         const val = el.value.trim();
-
-        if (field.name === 'apiKey') {
-          if (field.required && !val && key !== 'ollama') {
-            allValid = false;
-          }
-          providerData.apiKey = val || '';
-        } else if (field.name === 'model') {
-          models[key] = val || field.defaultValue || '';
-        } else if (field.name === 'baseUrl') {
-          baseUrls[key] = val || field.defaultValue || 'http://localhost:11434';
-        }
+        if (f.name === 'apiKey') data.apiKey = val;
+        else if (f.name === 'model') models[p.key] = val || f.defaultValue || '';
+        else if (f.name === 'baseUrl') baseUrls[p.key] = val || f.defaultValue || 'http://localhost:11434';
       });
-
-      if (providerData.apiKey) {
-        apiKeys[key] = providerData;
-      }
+      if (data.apiKey) apiKeys[p.key] = data;
     });
 
     const provider = document.getElementById('defaultProvider').value;
+    await new Promise(resolve => chrome.storage.local.set({ apiKeys, provider, model: models, baseUrl: baseUrls }, resolve));
 
-    await new Promise(resolve => {
-      chrome.storage.local.set({ apiKeys, provider, model: models, baseUrl: baseUrls }, resolve);
+    PROVIDERS.forEach(p => {
+      const keys = apiKeys[p.key] || {};
+      updateBadge(p.key, keys.apiKey);
     });
 
-    PROVIDERS.forEach(prov => {
-      const key = prov.key;
-      const keys = apiKeys[key] || {};
-      updateProviderStatus(key, keys.apiKey);
-    });
-
-    showGlobalMessage('Settings saved successfully!', 'success');
-  }
-
-  function updateProviderStatus(key, apiKey) {
-    const el = document.getElementById(`status-${key}`);
-    if (!el) return;
-    if (apiKey && apiKey.length > 0) {
-      el.className = 'provider-status connected';
-      el.textContent = 'Connected';
-    } else {
-      el.className = 'provider-status disconnected';
-      el.textContent = 'Not configured';
-    }
+    showGlobal('Settings saved.', 'ok');
   }
 
   async function testConnection(providerKey) {
@@ -206,22 +171,22 @@
     const modelEl = document.getElementById(`${providerKey}-model`);
     const baseUrlEl = document.getElementById(`${providerKey}-baseUrl`);
     const msgEl = document.getElementById(`msg-${providerKey}`);
-    const testBtn = document.querySelector(`.test-btn[data-provider="${providerKey}"]`);
+    const btn = document.querySelector(`.test-btn[data-provider="${providerKey}"]`);
 
     const apiKey = apiKeyEl?.value?.trim() || '';
     const model = modelEl?.value?.trim() || undefined;
     const baseUrl = baseUrlEl?.value?.trim() || undefined;
 
     if (!apiKey && providerKey !== 'ollama') {
-      msgEl.className = 'message error';
-      msgEl.textContent = 'Please enter an API key first.';
+      msgEl.className = 'message err';
+      msgEl.textContent = 'Enter an API key first.';
       return;
     }
 
-    testBtn.disabled = true;
-    testBtn.innerHTML = '<span class="spinner-sm"></span>';
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-sm"></span>';
     msgEl.className = 'message info';
-    msgEl.textContent = 'Testing connection...';
+    msgEl.textContent = 'Testing...';
 
     try {
       const result = await new Promise((resolve, reject) => {
@@ -231,30 +196,27 @@
           apiKey,
           model,
           baseUrl
-        }, (response) => {
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message));
-          } else if (response?.error) {
-            reject(new Error(response.error));
-          } else {
-            resolve(response?.result || '');
-          }
+        }, r => {
+          if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message));
+          else if (r?.error) reject(new Error(r.error));
+          else resolve(r?.result || '');
         });
       });
-      msgEl.className = 'message success';
-      msgEl.textContent = `Connected! Response: "${result.substring(0, 100)}${result.length > 100 ? '...' : ''}"`;
+      msgEl.className = 'message ok';
+      const snippet = result.length > 120 ? result.substring(0, 120) + '...' : result;
+      msgEl.textContent = 'OK: ' + snippet;
     } catch (err) {
-      msgEl.className = 'message error';
-      msgEl.textContent = `Connection failed: ${err.message}`;
+      msgEl.className = 'message err';
+      msgEl.textContent = 'Failed: ' + err.message;
     } finally {
-      testBtn.disabled = false;
-      testBtn.textContent = 'Test';
+      btn.disabled = false;
+      btn.textContent = 'Test';
     }
   }
 
-  function showGlobalMessage(text, type) {
+  function showGlobal(text, type) {
     const el = document.getElementById('globalMessage');
-    el.className = `message ${type}`;
+    el.className = 'msg-global ' + (type || '');
     el.textContent = text;
     setTimeout(() => { el.textContent = ''; }, 3000);
   }
