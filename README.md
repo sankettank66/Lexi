@@ -7,9 +7,11 @@ A browser extension that fixes grammar and rephrases selected text using AI-powe
 - **Fix Grammar** — Correct grammar, spelling, punctuation, and word choice
 - **Rephrase** — Improve clarity, flow, and readability while preserving meaning
 - **5 AI Providers** — OpenRouter, Gemini, OpenAI, NVIDIA, Ollama (local)
-- **Overlay Popup** — Shows original vs. corrected text with Accept / Try Again / Cancel
+- **Floating Dot** — Small dot appears near selected text; hover for Fix/Rephrase options
+- **Result Card** — Shows original vs. corrected text with Accept / Decline / Fix Again
+- **Typing Effect** — Gemini-style character-by-character streaming animation
 - **Secure** — API keys stored locally in `chrome.storage.local` (never synced to cloud)
-- **Lightweight** — Manifest V3, zero dependencies, no build step
+- **React + Tailwind** — Built with React and Tailwind CSS for a polished UI
 
 ## Architecture
 
@@ -52,12 +54,21 @@ lib/providers/
 
 ## Installation
 
+### Prerequisites
+
+```bash
+npm install        # Install React, Vite, Tailwind
+npm run build      # Build content UI to dist/
+```
+
 ### Chrome / Edge (Chromium)
 
 1. Open `chrome://extensions`
 2. Enable **Developer mode**
 3. Click **Load unpacked**
-4. Select the `ai-grammar-chrome-ext` folder
+4. Select the `ai-grammer-chrome-ext` folder
+
+> After modifying `src/content/`, rebuild with `npm run build` and reload the extension.
 
 ### Firefox
 
@@ -99,26 +110,38 @@ lib/providers/
 ## Development
 
 ```
-ai-grammar-chrome-ext/
-├── manifest.json          # Extension manifest (MV3)
-├── background.js          # Service worker: context menus, message routing
-├── content.js             # Content script: overlay UI, text replacement
-├── content.css            # Overlay styles (dark theme)
-├── options.html           # Settings page HTML
-├── options.js             # Settings page logic
-├── popup.html             # Extension popup HTML
-├── popup.js               # Extension popup logic
-├── lib/
-│   ├── api.js             # Provider registry and factory
-│   ├── utils.js           # Storage helpers and utilities
+ai-grammer-chrome-ext/
+├── manifest.json              # Extension manifest (MV3)
+├── background.js              # Service worker: context menus, message routing
+├── options.html               # Settings page HTML
+├── options.js                 # Settings page logic
+├── popup.html                 # Extension popup HTML
+├── popup.js                   # Extension popup logic
+├── design.md                  # Design system documentation
+├── package.json               # Build scripts and dependencies
+├── vite.config.js             # Vite build config
+├── src/
+│   └── content/               # React + Tailwind content script UI
+│       ├── main.jsx           # Entry point (Shadow DOM injection)
+│       ├── App.jsx            # Main state machine component
+│       ├── index.css          # Tailwind imports + custom animations
+│       └── components/
+│           ├── FloatingDot.jsx # Selection dot with hover tooltip
+│           └── ResultCard.jsx  # Result card with typing effect
+├── lib/                       # AI provider library
+│   ├── api.js                 # Provider registry and factory
+│   ├── utils.js               # Storage helpers and utilities
 │   └── providers/
-│       ├── base.js        # Abstract base provider
-│       ├── openrouter.js  # OpenRouter integration
-│       ├── gemini.js      # Google Gemini integration
-│       ├── openai.js      # OpenAI integration
-│       ├── nvidia.js      # NVIDIA integration
-│       └── ollama.js      # Ollama local integration
-└── icons/                 # Extension icons
+│       ├── base.js            # Abstract base provider
+│       ├── openrouter.js      # OpenRouter integration
+│       ├── gemini.js          # Google Gemini integration
+│       ├── openai.js          # OpenAI integration
+│       ├── nvidia.js          # NVIDIA integration
+│       └── ollama.js          # Ollama local integration
+├── dist/                      # Built output (npm run build)
+│   ├── content.js
+│   └── content.css
+└── icons/                     # Extension icons
 ```
 
 ### Adding a New Provider
@@ -128,6 +151,15 @@ ai-grammar-chrome-ext/
 3. Define static `key` and `label` getters
 4. Add `importScripts` line to `background.js`
 5. Add provider entry to `options.html` and `options.js`
+
+### Development Workflow
+
+```bash
+npm run build    # Production build
+npm run dev      # Watch mode (auto-rebuilds on changes)
+```
+
+After building, reload the extension in `chrome://extensions` to see changes.
 
 ## Permissions
 

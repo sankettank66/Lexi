@@ -113,7 +113,34 @@ importScripts(
         .catch(err => sendResponse({ error: err.message }));
       return true;
     }
+
+    if (message.action === 'processText') {
+      processText(message.text, message.menuItemId)
+        .then(result => sendResponse({ result }))
+        .catch(err => sendResponse({ error: err.message }));
+      return true;
+    }
   });
+
+  async function processText(text, menuItemId) {
+    if (!text || !menuItemId) throw new Error('Missing text or action');
+
+    const settings = await Utils.getSettings();
+    const provider = settings.provider || 'openrouter';
+    const apiKeys = settings.apiKeys || {};
+    const providerKeys = apiKeys[provider] || {};
+    const apiKey = providerKeys.apiKey || '';
+    const model = (settings.model || {})[provider];
+    const extraConfig = {};
+    const baseUrls = settings.baseUrl || {};
+    if (baseUrls[provider]) extraConfig.baseUrl = baseUrls[provider];
+
+    if (!apiKey && provider !== 'ollama') {
+      throw new Error(`No API key configured for ${provider}. Please add one in extension settings.`);
+    }
+
+    return AIAPI.callAI(provider, menuItemId, text, apiKey, model, extraConfig);
+  }
 
   async function testProviderConnection(msg) {
     const extraConfig = {};
