@@ -5,6 +5,7 @@ importScripts(
   'lib/providers/gemini.js',
   'lib/providers/openai.js',
   'lib/providers/nvidia.js',
+  'lib/providers/ollama.js',
   'lib/api.js'
 );
 
@@ -61,8 +62,11 @@ importScripts(
       const apiKeys = settings.apiKeys || {};
       const apiKey = apiKeys[provider];
       const model = (settings.model || {})[provider];
+      const extraConfig = {};
+      const baseUrls = settings.baseUrl || {};
+      if (baseUrls[provider]) extraConfig.baseUrl = baseUrls[provider];
 
-      if (!apiKey) {
+      if (!apiKey && provider !== 'ollama') {
         await sendToContent(tab.id, {
           action: 'showError',
           message: `No API key configured for ${provider}. Please add one in extension settings.`
@@ -73,7 +77,7 @@ importScripts(
       await sendToContent(tab.id, { action: 'saveSelection' });
       await sendToContent(tab.id, { action: 'showLoading' });
 
-      const result = await AIAPI.callAI(provider, action, text, apiKey, model);
+      const result = await AIAPI.callAI(provider, action, text, apiKey, model, extraConfig);
 
       await sendToContent(tab.id, {
         action: 'showResult',
@@ -111,15 +115,15 @@ importScripts(
   });
 
   async function testProviderConnection(msg) {
+    const extraConfig = {};
+    if (msg.baseUrl) extraConfig.baseUrl = msg.baseUrl;
+
     const provider = AIAPI.createProvider(
       msg.provider,
       msg.apiKey || '',
-      msg.model || undefined
+      msg.model || undefined,
+      extraConfig
     );
-
-    if (msg.baseUrl) {
-      provider.baseUrl = msg.baseUrl;
-    }
 
     return provider.testConnection();
   }
@@ -133,8 +137,11 @@ importScripts(
       const apiKeys = settings.apiKeys || {};
       const apiKey = apiKeys[provider];
       const model = (settings.model || {})[provider];
+      const extraConfig = {};
+      const baseUrls = settings.baseUrl || {};
+      if (baseUrls[provider]) extraConfig.baseUrl = baseUrls[provider];
 
-      if (!apiKey) {
+      if (!apiKey && provider !== 'ollama') {
         await sendToContent(tabId, {
           action: 'showError',
           message: `No API key configured for ${provider}.`
@@ -144,7 +151,7 @@ importScripts(
 
       await sendToContent(tabId, { action: 'showLoading' });
 
-      const result = await AIAPI.callAI(provider, menuItemId, text, apiKey, model);
+      const result = await AIAPI.callAI(provider, menuItemId, text, apiKey, model, extraConfig);
 
       await sendToContent(tabId, {
         action: 'showResult',
