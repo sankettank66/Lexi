@@ -4,6 +4,7 @@ importScripts(
   'lib/providers/openrouter.js',
   'lib/providers/gemini.js',
   'lib/providers/openai.js',
+  'lib/providers/nvidia.js',
   'lib/api.js'
 );
 
