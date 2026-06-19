@@ -2,6 +2,7 @@ importScripts(
   'lib/utils.js',
   'lib/providers/base.js',
   'lib/providers/openrouter.js',
+  'lib/providers/gemini.js',
   'lib/api.js'
 );
 
