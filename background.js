@@ -1,0 +1,147 @@
+importScripts(
+  'lib/utils.js',
+  'lib/providers/base.js',
+  'lib/providers/openrouter.js',
+  'lib/api.js'
+);
+
+(function () {
+  const MENU_IDS = {
+    SEPARATOR: 'ai-grammar-separator',
+    FIX_GRAMMAR: 'fix-grammar',
+    REPHRASE: 'rephrase'
+  };
+
+  chrome.runtime.onInstalled.addListener((details) => {
+    if (details.reason === 'install') {
+      chrome.storage.local.set(Utils.getDefaultSettings());
+    }
+    createContextMenus();
+  });
+
+  chrome.runtime.onStartup.addListener(createContextMenus);
+
+  function createContextMenus() {
+    chrome.contextMenus.removeAll(() => {
+      chrome.contextMenus.create({
+        id: 'ai-grammar-parent',
+        title: 'AI Grammar',
+        contexts: ['selection']
+      });
+
+      chrome.contextMenus.create({
+        id: MENU_IDS.FIX_GRAMMAR,
+        parentId: 'ai-grammar-parent',
+        title: 'Fix Grammar',
+        contexts: ['selection']
+      });
+
+      chrome.contextMenus.create({
+        id: MENU_IDS.REPHRASE,
+        parentId: 'ai-grammar-parent',
+        title: 'Rephrase',
+        contexts: ['selection']
+      });
+    });
+  }
+
+  chrome.contextMenus.onClicked.addListener(async (info, tab) => {
+    const text = Utils.sanitizeText(info.selectionText);
+    if (!text) return;
+
+    const action = info.menuItemId;
+    if (action !== MENU_IDS.FIX_GRAMMAR && action !== MENU_IDS.REPHRASE) return;
+
+    try {
+      const settings = await Utils.getSettings();
+      const provider = settings.provider || 'openrouter';
+      const apiKeys = settings.apiKeys || {};
+      const apiKey = apiKeys[provider];
+      const model = (settings.model || {})[provider];
+
+      if (!apiKey) {
+        await sendToContent(tab.id, {
+          action: 'showError',
+          message: `No API key configured for ${provider}. Please add one in extension settings.`
+        });
+        return;
+      }
+
+      await sendToContent(tab.id, { action: 'showLoading' });
+
+      const result = await AIAPI.callAI(provider, action, text, apiKey, model);
+
+      await sendToContent(tab.id, {
+        action: 'showResult',
+        original: text,
+        corrected: result,
+        menuItemId: action
+      });
+    } catch (err) {
+      await sendToContent(tab.id, {
+        action: 'showError',
+        message: err.message || 'An unexpected error occurred.'
+      });
+    }
+  });
+
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'tryAgain') {
+      chrome.contextMenus.onClicked.dispatch
+        ? null
+        : handleRetry(sender.tab?.id, message.text, message.menuItemId);
+      sendResponse({ ok: true });
+      return true;
+    }
+
+    if (message.action === 'openOptions') {
+      chrome.runtime.openOptionsPage();
+      sendResponse({ ok: true });
+      return true;
+    }
+  });
+
+  async function handleRetry(tabId, text, menuItemId) {
+    if (!tabId || !text || !menuItemId) return;
+
+    try {
+      const settings = await Utils.getSettings();
+      const provider = settings.provider || 'openrouter';
+      const apiKeys = settings.apiKeys || {};
+      const apiKey = apiKeys[provider];
+      const model = (settings.model || {})[provider];
+
+      if (!apiKey) {
+        await sendToContent(tabId, {
+          action: 'showError',
+          message: `No API key configured for ${provider}.`
+        });
+        return;
+      }
+
+      await sendToContent(tabId, { action: 'showLoading' });
+
+      const result = await AIAPI.callAI(provider, menuItemId, text, apiKey, model);
+
+      await sendToContent(tabId, {
+        action: 'showResult',
+        original: text,
+        corrected: result,
+        menuItemId
+      });
+    } catch (err) {
+      await sendToContent(tabId, {
+        action: 'showError',
+        message: err.message || 'Retry failed.'
+      });
+    }
+  }
+
+  async function sendToContent(tabId, message) {
+    try {
+      await chrome.tabs.sendMessage(tabId, message);
+    } catch {
+      console.warn('Content script not reachable on tab', tabId);
+    }
+  }
+})();
