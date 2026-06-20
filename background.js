@@ -1,3 +1,5 @@
+console.log('[Lexi] service worker started');
+
 importScripts(
   'lib/utils.js',
   'lib/providers/base.js',
@@ -11,9 +13,9 @@ importScripts(
 
 (function () {
   const MENU_IDS = {
-    SEPARATOR: 'ai-grammar-separator',
-    FIX_GRAMMAR: 'fix-grammar',
-    REPHRASE: 'rephrase'
+    SEPARATOR: 'lexi-separator',
+    FIX: 'fix',
+    REWRITE: 'rewrite'
   };
 
   chrome.runtime.onInstalled.addListener((details) => {
@@ -28,22 +30,22 @@ importScripts(
   function createContextMenus() {
     chrome.contextMenus.removeAll(() => {
       chrome.contextMenus.create({
-        id: 'ai-grammar-parent',
-        title: 'AI Grammar',
+        id: 'lexi-parent',
+        title: 'Lexi',
         contexts: ['selection']
       });
 
       chrome.contextMenus.create({
-        id: MENU_IDS.FIX_GRAMMAR,
-        parentId: 'ai-grammar-parent',
-        title: 'Fix Grammar',
+        id: MENU_IDS.FIX,
+        parentId: 'lexi-parent',
+        title: 'Fix',
         contexts: ['selection']
       });
 
       chrome.contextMenus.create({
-        id: MENU_IDS.REPHRASE,
-        parentId: 'ai-grammar-parent',
-        title: 'Rephrase',
+        id: MENU_IDS.REWRITE,
+        parentId: 'lexi-parent',
+        title: 'Rewrite',
         contexts: ['selection']
       });
     });
@@ -54,7 +56,7 @@ importScripts(
     if (!text) return;
 
     const action = info.menuItemId;
-    if (action !== MENU_IDS.FIX_GRAMMAR && action !== MENU_IDS.REPHRASE) return;
+    if (action !== MENU_IDS.FIX && action !== MENU_IDS.REWRITE) return;
 
     try {
       const settings = await Utils.getSettings();
@@ -123,6 +125,7 @@ importScripts(
   });
 
   async function processText(text, menuItemId) {
+    console.log('[Lexi] processText:', menuItemId, 'text:', text);
     if (!text || !menuItemId) throw new Error('Missing text or action');
 
     const settings = await Utils.getSettings();

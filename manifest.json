@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "AI Grammar Assistant",
-  "version": "1.0.0",
-  "description": "Fix grammar and rephrase selected text using AI-powered language models (OpenRouter, Gemini, OpenAI, NVIDIA, Ollama)",
+  "name": "Lexi - AI Writing Assistant",
+  "version": "1.1.0",
+  "description": "Fix and rewrite selected text using AI-powered language models (OpenRouter, Gemini, OpenAI, NVIDIA, Ollama)",
   "permissions": [
     "contextMenus",
     "storage",
@@ -23,7 +23,6 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "css": ["dist/content.css"],
       "js": ["dist/content.js"],
       "run_at": "document_idle"
     }

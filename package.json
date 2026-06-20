@@ -1,7 +1,7 @@
 {
-  "name": "ai-grammer-chrome-ext",
-  "version": "1.0.0",
-  "description": "A browser extension that fixes grammar and rephrases selected text using AI-powered language models. Supports **5 AI providers** with a pluggable architecture.",
+  "name": "lexi-chrome-ext",
+  "version": "1.1.0",
+  "description": "A browser extension that fixes and rewrites selected text using AI-powered language models. Supports 5 AI providers with a pluggable architecture.",
   "main": "background.js",
   "directories": {
     "lib": "lib"
