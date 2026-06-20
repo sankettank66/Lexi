@@ -17,20 +17,20 @@ A browser extension that fixes and rewrites selected text using AI-powered langu
 
 ```
                     ┌─────────────────────┐
-                    │   Options Page       │
-                    │  (API keys/config)   │
+                    │   Options Page      │
+                    │  (API keys/config)  │
                     └──────────┬──────────┘
                                │ chrome.storage.local
                     ┌──────────▼──────────┐
-  Right-click ────►│  Background Worker  │◄──── Popup
-  "Fix" / "Rewrite"│  (service worker)   │     (quick switch)
-                   └──────────┬──────────┘
-                              │
+   Right-click ────►│  Background Worker  │◄──── Popup
+   "Fix" / "Rewrite"│  (service worker)   │     (quick switch)
+                    └──────────┬──────────┘
+                               │
                     ┌──────────▼──────────┐
                     │   Content Script    │
                     │  (runs on webpage)  │
                     └──────────┬──────────┘
-                              │
+                               │
                     ┌──────────▼──────────┐
                     │  Overlay Popup UI   │
                     │  Accept / Fix Again │
