@@ -14,7 +14,6 @@ export default defineConfig({
       },
       output: {
         entryFileNames: '[name].js',
-        assetFileNames: 'content.[ext]',
         format: 'iife',
       },
     },

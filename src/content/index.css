@@ -1,63 +1,94 @@
 @import 'tailwindcss';
 
 @layer base {
-  *, *::before, *::after {
-    box-sizing: border-box;
-  }
+  *, *::before, *::after { box-sizing: border-box; }
 }
 
 @layer utilities {
-  .ai-grammar-shadow {
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  .ai-glass {
+    background: rgba(40, 38, 48, 0.2);
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    box-shadow: 0 10px 60px rgba(0, 0, 0, 0.35);
   }
-  .ai-grammar-glow-green {
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
-    animation: ai-pulse-green 2s infinite;
+  .ai-glass-elevated {
+    background: rgba(44, 42, 52, 0.25);
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    box-shadow: 0 12px 70px rgba(0, 0, 0, 0.45), 0 0 0 0.5px rgba(255, 255, 255, 0.01);
   }
-  .ai-grammar-glow-blue {
-    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
-    animation: ai-pulse-blue 2s infinite;
+  .ai-glass-header {
+    background: rgba(48, 46, 56, 0.15);
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  }
+  .ai-glass-dot {
+    background: rgba(59, 130, 246, 0.08);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+  }
+  .ai-glass-tooltip {
+    background: rgba(35, 33, 43, 0.4);
+    backdrop-filter: blur(50px);
+    -webkit-backdrop-filter: blur(50px);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+  }
+  .ai-glass-input {
+    background: rgba(13, 13, 13, 0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .ai-glass-input:focus {
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.06);
+    outline: none;
+  }
+  .ai-glass-btn {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .ai-glass-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.05);
+  }
+  .ai-glass-overlay {
+    background: rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
 }
 
-@keyframes ai-pulse-green {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
-  50% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
-}
-
-@keyframes ai-pulse-blue {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5); }
-  50% { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0); }
-}
-
-@keyframes ai-typing-cursor {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-
-@keyframes ai-slide-up {
-  from { opacity: 0; transform: translateY(8px) scale(0.96); }
+@keyframes ai-glass-enter {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
-
-@keyframes ai-shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+@keyframes ai-glass-fade {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes ai-glass-loading-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(59,130,246,0.15), 0 2px 12px rgba(0,0,0,0.35); transform: scale(1); }
+  50% { box-shadow: 0 0 28px rgba(59,130,246,0.35), 0 2px 12px rgba(0,0,0,0.35); transform: scale(1.15); }
+}
+@keyframes ai-glass-spin {
+  to { transform: rotate(360deg); }
 }
 
-.animate-ai-slide-up {
-  animation: ai-slide-up 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.animate-ai-shimmer {
-  background: linear-gradient(90deg, #2e2e2e 25%, #3a3a3a 50%, #2e2e2e 75%);
-  background-size: 200% 100%;
-  animation: ai-shimmer 1.5s ease-in-out infinite;
-}
+.animate-ai-glass-enter { animation: ai-glass-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-ai-glass-fade { animation: ai-glass-fade 0.25s ease-out both; }
+.animate-ai-glass-loading-pulse { animation: ai-glass-loading-pulse 1s ease-in-out infinite; }
+.animate-ai-glass-spin { animation: ai-glass-spin 0.6s linear infinite; }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }

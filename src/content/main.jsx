@@ -1,18 +1,18 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.jsx';
-import './index.css';
+import cssStr from './index.css?inline';
 
-const CONTAINER_ID = 'ai-grammar-root';
+const CONTAINER_ID = 'lexi-root';
 
 function inject() {
-  if (document.getElementById(CONTAINER_ID)) return;
+  if (document.getElementById(CONTAINER_ID)) { console.log('[Lexi] already injected'); return; }
   const root = document.createElement('div');
   root.id = CONTAINER_ID;
   document.documentElement.appendChild(root);
   const shadow = root.attachShadow({ mode: 'open' });
   const style = document.createElement('style');
-  style.textContent = ':host { all: initial; }';
+  style.textContent = cssStr;
   shadow.appendChild(style);
   const mount = document.createElement('div');
   shadow.appendChild(mount);
@@ -20,4 +20,9 @@ function inject() {
   reactRoot.render(React.createElement(App));
 }
 
-inject();
+const readyStates = ['interactive', 'complete'];
+if (readyStates.includes(document.readyState)) {
+  inject();
+} else {
+  document.addEventListener('DOMContentLoaded', inject);
+}

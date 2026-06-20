@@ -3,101 +3,112 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Grammar</title>
+  <title>Lexi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@400;700&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #0d0d0d;
-      --surface: #1a1a1a;
-      --elevated: #242424;
-      --border: #2e2e2e;
-      --text: #e8e8e8;
-      --text-secondary: #9ca3af;
-      --text-muted: #6b7280;
-      --accent-green: #10b981;
-      --accent-blue: #3b82f6;
-      --accent-amber: #f59e0b;
-    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: transparent;
       width: 280px;
-      padding: 16px;
+      padding: 0;
       font-size: 13px;
       line-height: 1.5;
+      color: rgba(255,255,255,0.85);
+    }
+    .glass-panel {
+      background: rgba(18, 16, 24, 0.6);
+      backdrop-filter: blur(40px);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      box-shadow: 0 10px 60px rgba(0, 0, 0, 0.5);
+      padding: 16px;
     }
     .header {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.02);
     }
     .header-icon {
-      width: 28px;
-      height: 28px;
-      background: var(--accent-green);
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
+      background: rgba(59,130,246,0.1);
+      backdrop-filter: blur(16px);
+
+      border: 1px solid rgba(255,255,255,0.04);
       display: flex;
       align-items: center;
       justify-content: center;
       color: #fff;
-      font-weight: 700;
-      font-size: 13px;
-      flex-shrink: 0;
-    }
-    .header-title {
       font-weight: 600;
       font-size: 14px;
-      color: var(--text);
+      flex-shrink: 0;
+      font-family: 'Instrument Sans', sans-serif;
     }
+    .header-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: 15px;
+      font-weight: 400;
+      color: #e8e8e8;
+    }
+
     .header-subtitle {
-      color: var(--text-muted);
-      font-size: 11px;
+      font-size: 10px;
+      color: rgba(255,255,255,0.35);
+      margin-top: 2px;
+      font-family: 'Instrument Sans', sans-serif;
+      letter-spacing: 0.02em;
     }
-    .form-group {
-      margin-bottom: 12px;
-    }
+
+    .form-group { margin-bottom: 12px; }
     .form-group label {
       display: block;
-      font-size: 11px;
-      color: var(--text-secondary);
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
       text-transform: uppercase;
-      letter-spacing: 0.4px;
+      letter-spacing: 0.5px;
       margin-bottom: 5px;
       font-weight: 500;
     }
     select {
       width: 100%;
-      padding: 8px 10px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
+      padding: 8px 12px;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(16px);
+
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 8px;
+      color: #e8e8e8;
       font-size: 13px;
-      font-family: inherit;
+      font-family: 'Instrument Sans', sans-serif;
       cursor: pointer;
       appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,0.4)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right 10px center;
-      padding-right: 28px;
+      background-position: right 12px center;
+      padding-right: 30px;
       transition: border-color 0.15s;
     }
     select:focus {
       outline: none;
-      border-color: var(--accent-green);
+      border-color: rgba(59,130,246,0.35);
     }
+    select option { background: rgba(18,16,24,0.98); color: #e8e8e8; }
     .status {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 10px 12px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(16px);
+
+      border: 1px solid rgba(255, 255, 255, 0.02);
+      border-radius: 8px;
       margin-bottom: 12px;
     }
     .status-dot {
@@ -106,71 +117,73 @@
       border-radius: 50%;
       flex-shrink: 0;
     }
-    .status-dot.connected { background: var(--accent-green); box-shadow: 0 0 6px rgba(16,185,129,0.3); }
-    .status-dot.disconnected { background: var(--accent-amber); }
+    .status-dot.connected { background: #3b82f6; box-shadow: 0 0 6px rgba(59,130,246,0.4); }
+    .status-dot.disconnected { background: #f59e0b; }
     .status-text {
       font-size: 12px;
-      color: var(--text-secondary);
+      color: rgba(255,255,255,0.5);
+      font-family: 'Instrument Sans', sans-serif;
     }
-    .actions {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
+    .actions { display: flex; flex-direction: column; gap: 6px; }
     .btn {
       padding: 8px 12px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 12px;
       font-weight: 500;
       cursor: pointer;
-      font-family: inherit;
-      transition: background 0.15s;
+      font-family: 'Instrument Sans', sans-serif;
+      transition: background 0.15s, border-color 0.15s;
       text-align: center;
       line-height: 1.4;
     }
     .btn:active { transform: scale(0.97); }
     .btn-secondary {
-      background: var(--surface);
-      color: var(--text-secondary);
-      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(16px);
+
+      border: 1px solid rgba(255,255,255,0.03);
+      color: rgba(255,255,255,0.5);
     }
-    .btn-secondary:hover { background: var(--elevated); color: var(--text); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.8); }
     .btn-link {
       background: transparent;
-      color: var(--text-muted);
+      color: rgba(255,255,255,0.2);
       font-size: 11px;
+      border: none;
     }
-    .btn-link:hover { color: var(--text-secondary); }
+    .btn-link:hover { color: rgba(255,255,255,0.4); }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="header-icon">A</div>
-    <div>
-      <div class="header-title">AI Grammar Assistant</div>
-      <div class="header-subtitle">Select text, right-click, fix</div>
+  <div class="glass-panel">
+    <div class="header">
+      <div class="header-icon">A</div>
+      <div>
+        <div class="header-title">Lexi</div>
+        <div class="header-subtitle">Select text &middot; Right-click &middot; Fix &middot; Rewrite</div>
+      </div>
     </div>
-  </div>
 
-  <div class="form-group">
-    <label for="providerSelect">Active Provider</label>
-    <select id="providerSelect">
-      <option value="openrouter">OpenRouter</option>
-      <option value="gemini">Gemini</option>
-      <option value="openai">OpenAI</option>
-      <option value="nvidia">NVIDIA</option>
-      <option value="ollama">Ollama (Local)</option>
-    </select>
-  </div>
+    <div class="form-group">
+      <label for="providerSelect">Active Provider</label>
+      <select id="providerSelect">
+        <option value="openrouter">OpenRouter</option>
+        <option value="gemini">Gemini</option>
+        <option value="openai">OpenAI</option>
+        <option value="nvidia">NVIDIA</option>
+        <option value="ollama">Ollama (Local)</option>
+      </select>
+    </div>
 
-  <div class="status">
-    <span class="status-dot" id="statusDot"></span>
-    <span class="status-text" id="statusText">Loading...</span>
-  </div>
+    <div class="status">
+      <span class="status-dot" id="statusDot"></span>
+      <span class="status-text" id="statusText">Loading...</span>
+    </div>
 
-  <div class="actions">
-    <button class="btn btn-secondary" id="openOptionsBtn">Open Settings</button>
+    <div class="actions">
+      <button class="btn btn-secondary" id="openOptionsBtn">Open Settings</button>
+    </div>
   </div>
 
   <script src="popup.js"></script>

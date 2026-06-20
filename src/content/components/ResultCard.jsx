@@ -1,95 +1,107 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
+
+const ACCENT = '#3b82f6';
+
+const btnGlass = {
+  padding: '8px 16px', borderRadius: 8, fontSize: 12, fontWeight: 500,
+  border: 'none', cursor: 'pointer', transition: 'all 0.15s',
+};
 
 export default function ResultCard({ original, corrected, action, onAccept, onDecline, onRefix, selInfo }) {
-  const [displayed, setDisplayed] = useState('');
-  const [done, setDone] = useState(false);
-  const [pos, setPos] = useState({});
   const cardRef = useRef(null);
 
-  /* Typing effect */
-  useEffect(() => {
-    setDisplayed('');
-    setDone(false);
-    if (!corrected) return;
-    let i = 0;
-    const slowAt = Math.max(0, corrected.length - 15);
-    const tick = () => {
-      if (i >= corrected.length) { setDone(true); return; }
-      setDisplayed(corrected.slice(0, i + 1));
-      i++;
-      setTimeout(tick, i >= slowAt ? 50 : 30);
-    };
-    tick();
-  }, [corrected]);
+  const isRewrite = action === 'rewrite';
 
-  /* Position near the selection */
-  useEffect(() => {
+  const getPos = () => {
     const info = selInfo;
-    if (!info) {
-      setPos({ top: '50%', left: '50%', transform: 'translate(-50%,-50%)' });
-      return;
-    }
+    if (!info) return { top: '50%', left: '50%', transform: 'translate(-50%,-50%)' };
     if (info.type === 'input' || info.type === 'textarea') {
       const r = info.element.getBoundingClientRect();
-      setPos({ top: Math.min(r.bottom + 8, window.innerHeight - 300), left: Math.max(8, r.left + 8) });
-      return;
+      return { top: Math.min(r.bottom + 8, window.innerHeight - 340), left: Math.max(8, r.left + 8) };
     }
     if (info.range) {
       const r = info.range.getBoundingClientRect();
       let t = r.bottom + 8;
       let l = r.left;
-      if (t + 300 > window.innerHeight) t = Math.max(8, r.top - 300);
+      if (t + 340 > window.innerHeight) t = Math.max(8, r.top - 340);
       if (l + 400 > window.innerWidth - 16) l = Math.max(8, window.innerWidth - 416);
-      setPos({ top: Math.max(8, t), left: Math.max(8, l) });
-      return;
+      return { top: Math.max(8, t), left: Math.max(8, l) };
     }
-    setPos({ top: '50%', left: '50%', transform: 'translate(-50%,-50%)' });
-  }, [selInfo]);
+    return { top: '50%', left: '50%', transform: 'translate(-50%,-50%)' };
+  };
 
-  const label = action === 'rephrase' ? 'Rephrase' : 'Fix Grammar';
-  const refixLabel = action === 'rephrase' ? 'Rephrase Again' : 'Fix Again';
-  const correctedLabel = action === 'rephrase' ? 'Rephrased' : 'Corrected';
+  const pos = getPos();
 
   return (
     <div ref={cardRef}
-      className="fixed bg-[#1a1a1a] border border-[#2e2e2e] rounded-xl ai-grammar-shadow w-[400px] animate-ai-slide-up overflow-hidden"
-      style={{ ...pos, position: 'fixed', zIndex: 2147483647, maxWidth: 'calc(100vw - 32px)', maxHeight: 'calc(100vh - 32px)' }}>
+      className="ai-glass-elevated animate-ai-glass-enter"
+      style={{
+        ...pos, position: 'fixed', zIndex: 2147483647,
+        width: 400, maxWidth: 'calc(100vw - 32px)', maxHeight: 'calc(100vh - 32px)',
+        borderRadius: 16, overflow: 'hidden',
+      }}>
       {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-2.5 bg-[#242424] border-b border-[#2e2e2e]">
-        <span className={`w-2 h-2 rounded-full shrink-0 ${action === 'rephrase' ? 'bg-blue-500' : 'bg-emerald-500'}`}
-          style={action === 'rephrase' ? { boxShadow: '0 0 6px rgba(59,130,246,0.4)' } : { boxShadow: '0 0 6px rgba(16,185,129,0.4)' }} />
-        <span className="text-[11px] text-gray-500 font-semibold uppercase tracking-wider">{label}</span>
+      <div className="ai-glass-header" style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        padding: '12px 16px',
+      }}>
+        <span style={{
+          width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+          background: ACCENT,
+          boxShadow: `0 0 8px ${ACCENT}55`,
+        }} />
+        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          {isRewrite ? 'Rewrite' : 'Fix'}
+        </span>
       </div>
 
       {/* Body */}
-      <div className="p-4 space-y-3 max-h-[300px] overflow-y-auto">
-        <div>
-          <div className="text-[10px] text-gray-600 font-medium uppercase tracking-wider mb-1">Original</div>
-          <div className="text-sm text-gray-500 line-through italic break-words">{original}</div>
+      <div style={{ padding: 16 }} className="max-h-[300px] overflow-y-auto">
+        <div className="animate-ai-glass-fade" style={{ marginBottom: 14, animationDelay: '0.05s' }}>
+          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Original</div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.3)', lineHeight: 1.5, textDecoration: 'line-through', fontStyle: 'italic', wordBreak: 'break-word' }}>{original}</div>
         </div>
-        <div>
-          <div className="text-[10px] text-gray-600 font-medium uppercase tracking-wider mb-1">{correctedLabel}</div>
-          <div className="text-sm text-gray-100 font-[450] break-words whitespace-pre-wrap">
-            {displayed}
-            {!done && <span className={`inline-block w-[2px] h-[1em] ml-0.5 align-text-bottom ${action === 'rephrase' ? 'bg-blue-500' : 'bg-emerald-500'} animate-pulse`} />}
+        <div className="animate-ai-glass-fade" style={{ animationDelay: '0.1s' }}>
+          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
+            {isRewrite ? 'Rewritten' : 'Corrected'}
+          </div>
+          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', fontWeight: 450, lineHeight: 1.6, wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+            {corrected}
           </div>
         </div>
       </div>
 
       {/* Footer */}
-      <div className="flex gap-2 justify-end px-4 py-3 bg-[#242424] border-t border-[#2e2e2e]">
+      <div className="ai-glass-header" style={{
+        display: 'flex', gap: 8, justifyContent: 'flex-end',
+        padding: '10px 16px',
+      }}>
         <button onClick={onDecline}
-          className="px-3.5 py-2 rounded-lg text-xs font-medium bg-[#333] text-gray-400 hover:bg-[#444] hover:text-gray-200 transition-colors">
+          className="ai-glass-btn"
+          style={{
+            ...btnGlass, color: 'rgba(255,255,255,0.45)',
+            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.03)',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)'; e.currentTarget.style.color = 'rgba(255,255,255,0.45)'; }}>
           Decline
         </button>
         <button onClick={onRefix}
-          className="px-3.5 py-2 rounded-lg text-xs font-medium text-white transition-colors"
-          style={{ backgroundColor: action === 'rephrase' ? '#3b82f6' : '#10b981' }}>
-          {refixLabel}
+          style={{
+            ...btnGlass, color: '#fff',
+            background: `${ACCENT}18`, border: `1px solid ${ACCENT}30`,
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = `${ACCENT}35`; }}
+          onMouseLeave={e => { e.currentTarget.style.background = `${ACCENT}18`; }}>
+          {isRewrite ? 'Rewrite Again' : 'Fix Again'}
         </button>
-        <button onClick={onAccept} disabled={!done}
-          className="px-4 py-2 rounded-lg text-xs font-medium text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-          style={{ backgroundColor: '#10b981' }}>
+        <button onClick={onAccept}
+          style={{
+            ...btnGlass, color: '#fff',
+            background: `${ACCENT}22`, border: `1px solid ${ACCENT}35`,
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = `${ACCENT}45`; }}
+          onMouseLeave={e => { e.currentTarget.style.background = `${ACCENT}22`; }}>
           Accept
         </button>
       </div>

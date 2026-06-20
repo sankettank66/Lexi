@@ -3,174 +3,212 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Grammar Assistant — Settings</title>
+  <title>Lexi - Settings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:wght@400;700&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #0d0d0d;
-      --surface: #1a1a1a;
-      --elevated: #242424;
-      --border: #2e2e2e;
-      --text: #e8e8e8;
-      --text-secondary: #9ca3af;
-      --text-muted: #6b7280;
-      --accent-green: #10b981;
-      --accent-green-hv: #059669;
-      --accent-blue: #3b82f6;
-      --accent-blue-hv: #2563eb;
-      --accent-amber: #f59e0b;
-      --accent-red: #ef4444;
-      --radius: 8px;
-    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      padding: 32px 16px;
-      max-width: 640px;
-      margin: 0 auto;
-      line-height: 1.5;
-    }
-    .page-header {
-      margin-bottom: 28px;
-    }
-    .page-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text);
+      font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0a0a0a;
+      min-height: 100vh;
+      padding: 40px 16px;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 10px;
+      line-height: 1.5;
+      color: rgba(255,255,255,0.85);
     }
-    .page-title-icon {
-      width: 28px;
-      height: 28px;
-      background: var(--accent-green);
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: #fff;
-      font-size: 14px;
-      font-weight: 700;
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 20% 30%, rgba(59,130,246,0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(99,102,241,0.1) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(59,130,246,0.04) 0%, transparent 50%);
+      z-index: -1;
+      pointer-events: none;
     }
-    .page-subtitle {
-      color: var(--text-muted);
-      font-size: 13px;
-      margin-top: 4px;
-    }
-    .section-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
+
+    .app-shell { max-width: 660px; width: 100%; }
+
+    /* ── Glass Card ── */
+    .glass-card {
+      background: rgba(40, 38, 48, 0.2);
+      backdrop-filter: blur(50px);
+      -webkit-backdrop-filter: blur(50px);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      box-shadow: 0 10px 60px rgba(0, 0, 0, 0.35);
+      border-radius: 16px;
+      padding: 24px;
       margin-bottom: 16px;
     }
-    .section-title {
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 16px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid var(--border);
+    .glass-card-header {
+      background: rgba(48, 46, 56, 0.15);
+      backdrop-filter: blur(50px);
+      -webkit-backdrop-filter: blur(50px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+      border-radius: 16px 16px 0 0;
+      padding: 14px 20px;
+      margin: -24px -24px 18px -24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
-    .form-group {
+
+    /* ── Glass Chip ── */
+    .glass-chip {
+      display: inline-block;
+      padding: 4px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 20px;
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+    }
+
+    /* ── Header ── */
+    .page-header {
+      margin-bottom: 28px;
+      text-align: center;
+    }
+    .page-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(59,130,246,0.12);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.06);
       margin-bottom: 12px;
+      font-family: 'Instrument Sans', sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: #fff;
+      box-shadow: 0 0 20px rgba(59,130,246,0.08);
     }
-    .form-group:last-child {
-      margin-bottom: 0;
+    .page-title {
+      font-family: 'Instrument Serif', serif;
+      font-size: 24px;
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      color: rgba(255,255,255,0.9);
     }
+
+    /* ── Form Elements ── */
+    .form-group { margin-bottom: 14px; }
+    .form-group:last-child { margin-bottom: 0; }
     .form-group label {
       display: block;
-      font-size: 12px;
-      color: var(--text-secondary);
-      margin-bottom: 4px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 5px;
       font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
-    .form-row {
-      display: flex;
-      gap: 8px;
-      align-items: flex-end;
-    }
-    .form-row .form-group {
-      flex: 1;
-      margin-bottom: 0;
-    }
+    .form-row { display: flex; gap: 10px; align-items: flex-end; }
+    .form-row .form-group { flex: 1; margin-bottom: 0; }
+
     input, select {
       width: 100%;
-      padding: 10px 12px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
+      padding: 10px 14px;
+      background: rgba(13, 13, 13, 0.5);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 8px;
+      color: rgba(255,255,255,0.85);
       font-size: 13px;
-      font-family: inherit;
-      transition: border-color 0.15s, box-shadow 0.15s;
+      font-family: 'Instrument Sans', sans-serif;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
     input:focus, select:focus {
       outline: none;
-      border-color: var(--accent-green);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+      border-color: rgba(59, 130, 246, 0.4);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.06);
     }
-    input[type="password"] { font-family: 'SF Mono', 'Fira Code', monospace; letter-spacing: 1px; }
-    input::placeholder { color: var(--text-muted); }
+    input[type="password"] { font-family: 'SF Mono', 'Fira Code', monospace; letter-spacing: 2px; }
+    input::placeholder { color: rgba(255,255,255,0.2); }
     select {
       cursor: pointer;
       appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,0.4)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
-      background-position: right 12px center;
-      padding-right: 32px;
+      background-position: right 14px center;
+      padding-right: 34px;
     }
+    select option { background: #1a1a1a; color: rgba(255,255,255,0.85); }
+
+    /* ── Buttons ── */
     .btn {
-      padding: 8px 16px;
+      padding: 9px 18px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       font-size: 12px;
       font-weight: 500;
       cursor: pointer;
       transition: background 0.15s, box-shadow 0.15s;
-      font-family: inherit;
+      font-family: 'Instrument Sans', sans-serif;
       white-space: nowrap;
       line-height: 1.4;
     }
     .btn:active { transform: scale(0.97); }
-    .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
     .btn-primary {
-      background: var(--accent-green);
+      background: rgba(59,130,246,0.15);
+      border: 1px solid rgba(59,130,246,0.3);
       color: #fff;
     }
     .btn-primary:hover:not(:disabled) {
-      background: var(--accent-green-hv);
-      box-shadow: 0 0 12px rgba(16,185,129,0.25);
+      background: rgba(59,130,246,0.3);
+      box-shadow: 0 0 16px rgba(59,130,246,0.1);
     }
     .btn-secondary {
-      background: var(--elevated);
-      color: var(--text-secondary);
-      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.03);
+      color: rgba(255,255,255,0.5);
     }
     .btn-secondary:hover:not(:disabled) {
-      background: #2e2e2e;
-      color: var(--text);
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.8);
     }
-    .btn-sm {
-      padding: 6px 12px;
+    .btn-sm { padding: 6px 12px; font-size: 11px; }
+    .btn-ghost {
+      background: transparent;
+      border: none;
+      color: rgba(255,255,255,0.25);
+      padding: 6px 10px;
       font-size: 11px;
     }
+    .btn-ghost:hover { color: rgba(255,255,255,0.5); }
+
+    .actions-row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+
+    /* ── Provider Cards ── */
     .provider-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
+      background: rgba(40, 38, 48, 0.18);
+      backdrop-filter: blur(50px);
+      -webkit-backdrop-filter: blur(50px);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      border-radius: 14px;
       padding: 20px;
       margin-bottom: 12px;
+      transition: border-color 0.2s;
     }
+    .provider-card:hover { border-color: rgba(255, 255, 255, 0.06); }
     .provider-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
     .provider-name {
       font-size: 14px;
@@ -178,91 +216,97 @@
       display: flex;
       align-items: center;
       gap: 8px;
+      font-family: 'Instrument Sans', sans-serif;
     }
+    .provider-name-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
     .provider-badge {
       font-size: 10px;
-      padding: 2px 8px;
-      border-radius: 10px;
+      padding: 2px 10px;
+      border-radius: 20px;
       font-weight: 500;
+      backdrop-filter: blur(4px);
     }
-    .provider-badge.ok { background: rgba(16,185,129,0.15); color: #6ee7b7; }
-    .provider-badge.missing { background: rgba(245,158,11,0.15); color: #fcd34d; }
-    .provider-badge.err { background: rgba(239,68,68,0.15); color: #fca5a5; }
+    .provider-badge.ok { background: rgba(59,130,246,0.1); color: #93c5fd; border: 1px solid rgba(59,130,246,0.12); }
+    .provider-badge.missing { background: rgba(245,158,11,0.1); color: #fcd34d; border: 1px solid rgba(245,158,11,0.12); }
+    .provider-badge.err { background: rgba(239,68,68,0.1); color: #fca5a5; border: 1px solid rgba(239,68,68,0.12); }
     .message {
       font-size: 12px;
       margin-top: 6px;
       min-height: 18px;
       line-height: 1.4;
+      font-family: 'Instrument Sans', sans-serif;
     }
-    .message.ok { color: #6ee7b7; }
+    .message.ok { color: #93c5fd; }
     .message.err { color: #fca5a5; }
     .message.info { color: #93c5fd; }
+
     .doc-link {
-      color: var(--accent-blue);
+      color: rgba(59,130,246,0.6);
       font-size: 11px;
       text-decoration: none;
       transition: color 0.15s;
     }
-    .doc-link:hover { color: var(--accent-blue-hv); text-decoration: underline; }
-    .actions {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-end;
-      margin-top: 8px;
-    }
+    .doc-link:hover { color: rgba(59,130,246,1); text-decoration: underline; }
+
     .spinner-sm {
       display: inline-block;
       width: 14px;
       height: 14px;
-      border: 2px solid rgba(255,255,255,0.2);
-      border-top-color: #fff;
+      border: 2px solid rgba(255,255,255,0.08);
+      border-top-color: rgba(255,255,255,0.5);
       border-radius: 50%;
       animation: spin 0.6s linear infinite;
       vertical-align: middle;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
     .msg-global {
       text-align: right;
       font-size: 12px;
       min-height: 20px;
+      color: rgba(255,255,255,0.25);
+      font-family: 'Instrument Sans', sans-serif;
     }
+
     @media (max-width: 480px) {
-      body { padding: 20px 12px; }
-      .section-card, .provider-card { padding: 16px; }
+      body { padding: 24px 12px; }
+      .glass-card { padding: 18px; }
+      .glass-card-header { margin: -18px -18px 14px -18px; padding: 12px 16px; }
+      .provider-card { padding: 16px; }
     }
   </style>
 </head>
 <body>
-  <div class="page-header">
-    <div class="page-title">
-      <span class="page-title-icon">A</span>
-      AI Grammar Assistant
+  <div class="app-shell">
+    <div class="page-header">
+      <div class="page-logo">A</div>
+      <div class="page-title">Lexi - AI Writing Assistant</div>
+      <p style="margin-top:8px;">          <span class="glass-chip">Configure AI providers &middot; Keys stay local &middot; Powered by Lexi</span></p>
     </div>
-    <p class="page-subtitle">Configure your AI providers. API keys are stored locally in your browser.</p>
-  </div>
 
-  <div class="section-card">
-    <div class="section-title">
-      <span>Default Provider</span>
+    <div class="glass-card">
+      <div class="glass-card-header">
+        <span style="font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:600;color:rgba(255,255,255,0.7);">Default Provider</span>
+      </div>
+      <div class="form-group">
+        <label for="defaultProvider">AI provider used when none is specified</label>
+        <select id="defaultProvider">
+          <option value="openrouter">OpenRouter</option>
+          <option value="gemini">Gemini</option>
+          <option value="openai">OpenAI</option>
+          <option value="nvidia">NVIDIA</option>
+          <option value="ollama">Ollama (Local)</option>
+        </select>
+      </div>
     </div>
-    <div class="form-group">
-      <label for="defaultProvider">Choose which AI provider to use by default</label>
-      <select id="defaultProvider">
-        <option value="openrouter">OpenRouter</option>
-        <option value="gemini">Gemini</option>
-        <option value="openai">OpenAI</option>
-        <option value="nvidia">NVIDIA</option>
-        <option value="ollama">Ollama (Local)</option>
-      </select>
+
+    <div id="providerContainers"></div>
+
+    <div class="actions-row" style="margin-top:8px;">
+      <button id="saveBtn" class="btn btn-primary">Save Settings</button>
     </div>
+    <p id="globalMessage" class="msg-global" style="margin-top:8px;"></p>
   </div>
-
-  <div id="providerContainers"></div>
-
-  <div class="actions">
-    <button id="saveBtn" class="btn btn-primary">Save Settings</button>
-  </div>
-  <p id="globalMessage" class="msg-global"></p>
 
   <script src="options.js"></script>
 </body>
