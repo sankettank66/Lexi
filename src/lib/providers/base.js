@@ -36,19 +36,19 @@
 
     buildPrompt(action, text) {
       const prompts = {
-        'fix': `You are a professional proofreader and grammar expert. Fix any grammar, spelling, punctuation, and word choice errors in the following text. Return ONLY the corrected text without any explanations, quotes, or additional formatting. Do not change the meaning or tone of the original text unless it contains errors.\n\nText: "${text}"`,
-        'rewrite': `You are a professional writing assistant. Rewrite the following text to improve clarity, flow, and readability while preserving the original meaning and tone. Return ONLY the rewritten text without any explanations, quotes, or additional formatting.\n\nText: "${text}"`
+        'fix': `You are a professional proofreader and grammar expert. Fix any grammar, spelling, punctuation, and word choice errors in the following text. Return ONLY the corrected text without any explanations, quotes, or additional formatting. Do not change the meaning or tone of the original text unless it contains errors. Do not wrap the result in quotes.\n\nText: ${text}`,
+        'rewrite': `You are a professional writing assistant. Rewrite the following text to improve clarity, flow, and readability while preserving the original meaning and tone. Return ONLY the rewritten text without any explanations, quotes, or additional formatting. Do not wrap the result in quotes.\n\nText: ${text}`
       };
       return prompts[action] || prompts['fix'];
     }
 
     async fixGrammar(text) {
-      const prompt = this.buildPrompt('fix-grammar', text);
+      const prompt = this.buildPrompt('fix', text);
       return this.callAPI(prompt);
     }
 
     async rephrase(text) {
-      const prompt = this.buildPrompt('rephrase', text);
+      const prompt = this.buildPrompt('rewrite', text);
       return this.callAPI(prompt);
     }
 
@@ -57,7 +57,7 @@
     }
 
     async testConnection() {
-      return this.callAPI(this.buildPrompt('fix-grammar', 'Test connection.'));
+      return this.callAPI(this.buildPrompt('fix', 'Test connection.'));
     }
   }
 

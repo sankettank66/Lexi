@@ -6,6 +6,14 @@ const PHASES = { IDLE: 0, DOT: 1, LOADING: 2, RESULT: 3, ERROR: 4 };
 
 let processing = false;
 
+function stripOuterQuotes(text) {
+  if (!text || text.length < 2) return text;
+  if ((text.startsWith('"') && text.endsWith('"')) || (text.startsWith('\'') && text.endsWith('\''))) {
+    return text.slice(1, -1).trim();
+  }
+  return text;
+}
+
 export default function App() {
   const [phase, setPhase] = useState(PHASES.IDLE);
   const [dotPos, setDotPos] = useState({ x: 0, y: 0 });
@@ -32,7 +40,7 @@ export default function App() {
         sendResponse({ ok: true });
       } else if (msg.action === 'showResult') {
         setOriginal(msg.original);
-        setCorrected(msg.corrected);
+        setCorrected(stripOuterQuotes(msg.corrected));
         setAction(msg.menuItemId);
         setPhase(PHASES.RESULT);
         sendResponse({ ok: true });
@@ -135,7 +143,7 @@ export default function App() {
       processing = false;
       if (chrome.runtime.lastError) { setErrorMsg(chrome.runtime.lastError.message); setPhase(PHASES.ERROR); return; }
       if (r?.error) { setErrorMsg(r.error); setPhase(PHASES.ERROR); return; }
-      setCorrected(r.result);
+      setCorrected(stripOuterQuotes(r.result));
       setPhase(PHASES.RESULT);
     });
   }, []);
@@ -168,7 +176,7 @@ export default function App() {
       processing = false;
       if (chrome.runtime.lastError) { setErrorMsg(chrome.runtime.lastError.message); setPhase(PHASES.ERROR); return; }
       if (r?.error) { setErrorMsg(r.error); setPhase(PHASES.ERROR); return; }
-      setCorrected(r.result);
+      setCorrected(stripOuterQuotes(r.result));
       setPhase(PHASES.RESULT);
     });
   }, [corrected, action]);
