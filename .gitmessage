@@ -1,0 +1,21 @@
+# ── Subject line ──────────────────────────────────────────────────
+# <type>(<scope>): <subject>
+#   │         │        │
+#   │         │        └─ ≤80 chars, imperative, no period
+#   │         └────────── Optional scope (e.g. ui, providers, build)
+#   └──────────────────── Type: feat | fix | docs | refactor | chore | test
+#
+# Examples:
+#   feat(providers): add OpenAI provider
+#   fix(ui): correct Shadow DOM event retargeting
+#   docs: update README with architecture overview
+#
+# ── Body — describe what and why (not how) ───────────────────────
+#
+# A blank line separates subject from body. Explain the motivation,
+# context, and reasoning. Wrap at 72 characters.
+#
+#
+# ── Footer (optional) ────────────────────────────────────────────
+# BREAKING CHANGE: <description>
+# Closes #<issue>
