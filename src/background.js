@@ -1,14 +1,14 @@
 console.log('[Lexi] service worker started');
 
 importScripts(
-  'lib/utils.js',
-  'lib/providers/base.js',
-  'lib/providers/openrouter.js',
-  'lib/providers/gemini.js',
-  'lib/providers/openai.js',
-  'lib/providers/nvidia.js',
-  'lib/providers/ollama.js',
-  'lib/api.js'
+  'src/lib/utils.js',
+  'src/lib/providers/base.js',
+  'src/lib/providers/openrouter.js',
+  'src/lib/providers/gemini.js',
+  'src/lib/providers/openai.js',
+  'src/lib/providers/nvidia.js',
+  'src/lib/providers/ollama.js',
+  'src/lib/api.js'
 );
 
 (function () {
