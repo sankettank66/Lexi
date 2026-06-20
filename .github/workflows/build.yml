@@ -37,7 +37,7 @@ jobs:
           path: |
             dist/
             icons/
-            src/background.js
+            background.js
             src/lib/
             src/options/
             src/popup/

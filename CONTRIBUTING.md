@@ -16,8 +16,8 @@ Then load `dist/` as an unpacked extension in Chrome.
 ## Project Structure
 
 ```
+background.js       # Service worker (context menus, message routing)
 src/
-  background.js       # Service worker (context menus, message routing)
   lib/                # Shared library
     api.js            # Provider registry and dispatch
     utils.js          # Helpers
