@@ -3,7 +3,8 @@
     API_KEYS: 'apiKeys',
     PROVIDER: 'provider',
     MODEL: 'model',
-    BASE_URL: 'baseUrl'
+    BASE_URL: 'baseUrl',
+    MAX_TOKENS: 'maxTokens'
   };
 
   function getDefaultSettings() {
@@ -11,14 +12,15 @@
       [STORAGE_KEYS.PROVIDER]: 'openrouter',
       [STORAGE_KEYS.MODEL]: {},
       [STORAGE_KEYS.BASE_URL]: {},
-      [STORAGE_KEYS.API_KEYS]: {}
+      [STORAGE_KEYS.API_KEYS]: {},
+      [STORAGE_KEYS.MAX_TOKENS]: {}
     };
   }
 
   async function getSettings() {
     return new Promise((resolve) => {
       chrome.storage.local.get(
-        [STORAGE_KEYS.PROVIDER, STORAGE_KEYS.MODEL, STORAGE_KEYS.BASE_URL, STORAGE_KEYS.API_KEYS],
+        [STORAGE_KEYS.PROVIDER, STORAGE_KEYS.MODEL, STORAGE_KEYS.BASE_URL, STORAGE_KEYS.API_KEYS, STORAGE_KEYS.MAX_TOKENS],
         (result) => {
           resolve({ ...getDefaultSettings(), ...result });
         }

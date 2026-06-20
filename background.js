@@ -68,6 +68,8 @@ importScripts(
       const extraConfig = {};
       const baseUrls = settings.baseUrl || {};
       if (baseUrls[provider]) extraConfig.baseUrl = baseUrls[provider];
+      const maxTokens = settings.maxTokens || {};
+      if (maxTokens[provider]) extraConfig.maxTokens = maxTokens[provider];
 
       if (!apiKey && provider !== 'ollama') {
         await sendToContent(tab.id, {
@@ -122,6 +124,15 @@ importScripts(
         .catch(err => sendResponse({ error: err.message }));
       return true;
     }
+
+    if (message.action === 'fetchModels') {
+      const extraConfig = {};
+      if (message.baseUrl) extraConfig.baseUrl = message.baseUrl;
+      AIAPI.fetchProviderModels(message.provider, message.apiKey || '', extraConfig)
+        .then(models => sendResponse({ models }))
+        .catch(err => sendResponse({ error: err.message }));
+      return true;
+    }
   });
 
   async function processText(text, menuItemId) {
@@ -137,6 +148,8 @@ importScripts(
     const extraConfig = {};
     const baseUrls = settings.baseUrl || {};
     if (baseUrls[provider]) extraConfig.baseUrl = baseUrls[provider];
+    const maxTokens = settings.maxTokens || {};
+    if (maxTokens[provider]) extraConfig.maxTokens = maxTokens[provider];
 
     if (!apiKey && provider !== 'ollama') {
       throw new Error(`No API key configured for ${provider}. Please add one in extension settings.`);
@@ -172,6 +185,8 @@ importScripts(
       const extraConfig = {};
       const baseUrls = settings.baseUrl || {};
       if (baseUrls[provider]) extraConfig.baseUrl = baseUrls[provider];
+      const maxTokens = settings.maxTokens || {};
+      if (maxTokens[provider]) extraConfig.maxTokens = maxTokens[provider];
 
       if (!apiKey && provider !== 'ollama') {
         await sendToContent(tabId, {

@@ -1,6 +1,11 @@
 (function () {
   const Base = self.AIProviders.Base;
 
+  const NVIDIA_FALLBACK_MODELS = [
+    'meta/llama-3.1-8b-instruct', 'meta/llama-3.1-70b-instruct', 'mistralai/mixtral-8x22b-instruct',
+    'nvidia/nemotron-4-340b-instruct', 'google/gemma-2-27b-it'
+  ];
+
   class NVIDIAProvider extends Base {
     static get key() { return 'nvidia'; }
     static get label() { return 'NVIDIA'; }
@@ -21,6 +26,24 @@
       this.baseUrl = 'https://integrate.api.nvidia.com';
     }
 
+    static async getAvailableModels(apiKey, extraConfig) {
+      const baseUrl = (extraConfig && extraConfig.baseUrl) || 'https://integrate.api.nvidia.com';
+      if (!apiKey) return NVIDIA_FALLBACK_MODELS.map(m => ({ value: m, label: m }));
+      try {
+        const response = await fetch(`${baseUrl}/v1/models`, {
+          headers: { 'Authorization': `Bearer ${apiKey}` }
+        });
+        if (!response.ok) return NVIDIA_FALLBACK_MODELS.map(m => ({ value: m, label: m }));
+        const data = await response.json();
+        const models = (data.data || [])
+          .filter(m => m.id)
+          .map(m => ({ value: m.id, label: m.id }));
+        return models.length > 0 ? models : NVIDIA_FALLBACK_MODELS.map(m => ({ value: m, label: m }));
+      } catch {
+        return NVIDIA_FALLBACK_MODELS.map(m => ({ value: m, label: m }));
+      }
+    }
+
     async callAPI(prompt) {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 30000);
@@ -36,7 +59,7 @@
             model: this.model,
             messages: [{ role: 'user', content: prompt }],
             temperature: 0.3,
-            max_tokens: 2048
+            max_tokens: this.maxTokens || 2048
           }),
           signal: controller.signal
         });

@@ -57,6 +57,11 @@
     return provider.testConnection();
   }
 
+  async function fetchProviderModels(providerKey, apiKey, extraConfig) {
+    const Klass = getProviderClass(providerKey);
+    return Klass.getAvailableModels(apiKey, extraConfig);
+  }
+
   (function autoRegister() {
     const classes = self.AIProviders || {};
     for (const key of Object.keys(classes)) {
@@ -73,6 +78,7 @@
     getRegisteredProviders,
     getProviderConfigFields,
     callAI,
-    testProviderConnection
+    testProviderConnection,
+    fetchProviderModels
   };
 })();

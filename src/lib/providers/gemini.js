@@ -1,6 +1,10 @@
 (function () {
   const Base = self.AIProviders.Base;
 
+  const GEMINI_FALLBACK_MODELS = [
+    'gemini-2.0-flash', 'gemini-2.0-flash-lite', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-1.5-flash-8b'
+  ];
+
   class GeminiProvider extends Base {
     static get key() { return 'gemini'; }
     static get label() { return 'Gemini'; }
@@ -20,6 +24,21 @@
       this.model = model || this.defaultModel;
     }
 
+    static async getAvailableModels(apiKey) {
+      if (!apiKey) return GEMINI_FALLBACK_MODELS.map(m => ({ value: m, label: m }));
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`);
+        if (!response.ok) return GEMINI_FALLBACK_MODELS.map(m => ({ value: m, label: m }));
+        const data = await response.json();
+        const models = data.models
+          .filter(m => m.name.startsWith('models/gemini-'))
+          .map(m => ({ value: m.name.replace('models/', ''), label: m.displayName || m.name.replace('models/', '') }));
+        return models.length > 0 ? models : GEMINI_FALLBACK_MODELS.map(m => ({ value: m, label: m }));
+      } catch {
+        return GEMINI_FALLBACK_MODELS.map(m => ({ value: m, label: m }));
+      }
+    }
+
     async callAPI(prompt) {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 30000);
@@ -34,7 +53,7 @@
             contents: [{ parts: [{ text: prompt }] }],
             generationConfig: {
               temperature: 0.3,
-              maxOutputTokens: 2048,
+              maxOutputTokens: this.maxTokens || 2048,
               topP: 0.95
             }
           }),

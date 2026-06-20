@@ -3,10 +3,15 @@
 
   class BaseProvider {
     constructor(apiKey) {
-      if (!apiKey) {
+      if (!apiKey && apiKey !== '') {
         throw new Error('API key is required');
       }
-      this.apiKey = apiKey;
+      this.apiKey = apiKey || '';
+      this.maxTokens = 2048;
+    }
+
+    static async getAvailableModels(apiKey, extraConfig) {
+      return [];
     }
 
     get key() {

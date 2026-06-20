@@ -1,6 +1,10 @@
 (function () {
   const Base = self.AIProviders.Base;
 
+  const OLLAMA_FALLBACK_MODELS = [
+    'llama3.2', 'llama3.1', 'mistral', 'phi3', 'mixtral', 'codellama'
+  ];
+
   class OllamaProvider extends Base {
     static get key() { return 'ollama'; }
     static get label() { return 'Ollama (Local)'; }
@@ -22,6 +26,24 @@
       this.baseUrl = 'http://localhost:11434';
     }
 
+    static async getAvailableModels(apiKey, extraConfig) {
+      const baseUrl = (extraConfig && extraConfig.baseUrl) || 'http://localhost:11434';
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000);
+        const response = await fetch(`${baseUrl}/api/tags`, { signal: controller.signal });
+        clearTimeout(timeout);
+        if (!response.ok) return OLLAMA_FALLBACK_MODELS.map(m => ({ value: m, label: m }));
+        const data = await response.json();
+        const models = (data.models || [])
+          .filter(m => m.name)
+          .map(m => ({ value: m.name, label: m.name }));
+        return models.length > 0 ? models : OLLAMA_FALLBACK_MODELS.map(m => ({ value: m, label: m }));
+      } catch {
+        return OLLAMA_FALLBACK_MODELS.map(m => ({ value: m, label: m }));
+      }
+    }
+
     async callAPI(prompt) {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 60000);
@@ -35,7 +57,8 @@
             messages: [{ role: 'user', content: prompt }],
             stream: false,
             options: {
-              temperature: 0.3
+              temperature: 0.3,
+              num_predict: this.maxTokens || 2048
             }
           }),
           signal: controller.signal

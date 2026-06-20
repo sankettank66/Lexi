@@ -1,6 +1,11 @@
 (function () {
   const Base = self.AIProviders.Base;
 
+  const OPENROUTER_FALLBACK_MODELS = [
+    'openai/gpt-4o-mini', 'openai/gpt-4o', 'anthropic/claude-3.5-sonnet', 'google/gemini-2.0-flash',
+    'mistralai/mixtral-8x22b-instruct', 'meta-llama/llama-3.1-8b-instruct'
+  ];
+
   class OpenRouterProvider extends Base {
     static get key() { return 'openrouter'; }
     static get label() { return 'OpenRouter'; }
@@ -20,6 +25,23 @@
       this.model = model || this.defaultModel;
     }
 
+    static async getAvailableModels(apiKey) {
+      if (!apiKey) return OPENROUTER_FALLBACK_MODELS.map(m => ({ value: m, label: m }));
+      try {
+        const response = await fetch('https://openrouter.ai/api/v1/models', {
+          headers: { 'Authorization': `Bearer ${apiKey}` }
+        });
+        if (!response.ok) return OPENROUTER_FALLBACK_MODELS.map(m => ({ value: m, label: m }));
+        const data = await response.json();
+        const models = (data.data || [])
+          .filter(m => m.id)
+          .map(m => ({ value: m.id, label: m.name || m.id }));
+        return models.length > 0 ? models : OPENROUTER_FALLBACK_MODELS.map(m => ({ value: m, label: m }));
+      } catch {
+        return OPENROUTER_FALLBACK_MODELS.map(m => ({ value: m, label: m }));
+      }
+    }
+
     async callAPI(prompt) {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 30000);
@@ -37,7 +59,7 @@
             model: this.model,
             messages: [{ role: 'user', content: prompt }],
             temperature: 0.3,
-            max_tokens: 2048
+            max_tokens: this.maxTokens || 2048
           }),
           signal: controller.signal
         });
