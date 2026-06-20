@@ -1,17 +1,17 @@
-# AI Grammar Assistant
+# Lexi - AI Writing Assistant
 
-A browser extension that fixes grammar and rephrases selected text using AI-powered language models. Supports **5 AI providers** with a pluggable architecture.
+A browser extension that fixes and rewrites selected text using AI-powered language models. Supports **5 AI providers** with a pluggable architecture.
 
 ## Features
 
-- **Fix Grammar** — Correct grammar, spelling, punctuation, and word choice
-- **Rephrase** — Improve clarity, flow, and readability while preserving meaning
-- **5 AI Providers** — OpenRouter, Gemini, OpenAI, NVIDIA, Ollama (local)
-- **Floating Dot** — Small dot appears near selected text; hover for Fix/Rephrase options
-- **Result Card** — Shows original vs. corrected text with Accept / Decline / Fix Again
-- **Typing Effect** — Gemini-style character-by-character streaming animation
-- **Secure** — API keys stored locally in `chrome.storage.local` (never synced to cloud)
-- **React + Tailwind** — Built with React and Tailwind CSS for a polished UI
+- **Fix** - Correct grammar, spelling, punctuation, and word choice
+- **Rewrite** - Improve clarity, flow, and readability while preserving meaning
+- **5 AI Providers** - OpenRouter, Gemini, OpenAI, NVIDIA, Ollama (local)
+- **Floating Dot** - Sparkle trigger near selected text; click for Fix / Rewrite options
+- **Result Card** - Shows original vs. corrected text with Accept / Decline / Fix Again
+- **Apple Glass UI** - Frosted glassmorphism with 50px backdrop blur
+- **Secure** - API keys stored locally in `chrome.storage.local` (never synced)
+- **React + Tailwind** - Built with React and Tailwind CSS for a polished UI
 
 ## Architecture
 
@@ -22,19 +22,19 @@ A browser extension that fixes grammar and rephrases selected text using AI-powe
                     └──────────┬──────────┘
                                │ chrome.storage.local
                     ┌──────────▼──────────┐
-  Right-click ─────►│  Background Worker  │◄──── Popup
-  "Fix Grammar"     │  (service worker)   │     (quick switch)
-  "Rephrase"        └──────────┬──────────┘
-                               │
+  Right-click ────►│  Background Worker  │◄──── Popup
+  "Fix" / "Rewrite"│  (service worker)   │     (quick switch)
+                   └──────────┬──────────┘
+                              │
                     ┌──────────▼──────────┐
                     │   Content Script    │
                     │  (runs on webpage)  │
                     └──────────┬──────────┘
-                               │
+                              │
                     ┌──────────▼──────────┐
                     │  Overlay Popup UI   │
-                    │  Accept / Try Again │
-                    │  / Cancel           │
+                    │  Accept / Fix Again │
+                    │  / Decline          │
                     └─────────────────────┘
 ```
 
@@ -66,7 +66,7 @@ npm run build      # Build content UI to dist/
 1. Open `chrome://extensions`
 2. Enable **Developer mode**
 3. Click **Load unpacked**
-4. Select the `ai-grammer-chrome-ext` folder
+4. Select the `lexi-chrome-ext` folder
 
 > After modifying `src/content/`, rebuild with `npm run build` and reload the extension.
 
@@ -94,40 +94,40 @@ npm run build      # Build content UI to dist/
 | Gemini     | https://aistudio.google.com/app/apikey     |
 | OpenAI     | https://platform.openai.com/api-keys       |
 | NVIDIA     | https://build.nvidia.com/                  |
-| Ollama     | Local — no key needed (http://localhost:11434) |
+| Ollama     | Local - no key needed (http://localhost:11434) |
 
 ## Usage
 
 1. Select text on any webpage
-2. Right-click → **AI Grammar** → **Fix Grammar** or **Rephrase**
-3. Wait for the AI response (loading spinner)
-4. Review the result in the overlay popup
+2. Right-click → **Lexi** → **Fix** or **Rewrite**
+3. Wait for the AI response (spinner + cycling status)
+4. Review the result in the overlay card
 5. Choose:
-   - **Accept** — replaces the selected text
-   - **Try Again** — re-sends the request
-   - **Cancel** — dismisses the overlay
+   - **Accept** - replaces the selected text
+   - **Fix Again** / **Rewrite Again** - re-sends the corrected text
+   - **Decline** - dismisses the card
 
 ## Development
 
 ```
-ai-grammer-chrome-ext/
+lexi-chrome-ext/
 ├── manifest.json              # Extension manifest (MV3)
 ├── background.js              # Service worker: context menus, message routing
-├── options.html               # Settings page HTML
+├── options.html               # Settings page (glassmorphism dashboard)
 ├── options.js                 # Settings page logic
-├── popup.html                 # Extension popup HTML
+├── popup.html                 # Extension popup (glass panel)
 ├── popup.js                   # Extension popup logic
 ├── design.md                  # Design system documentation
 ├── package.json               # Build scripts and dependencies
 ├── vite.config.js             # Vite build config
+├── .github/workflows/build.yml # CI/CD pipeline
 ├── src/
 │   └── content/               # React + Tailwind content script UI
 │       ├── main.jsx           # Entry point (Shadow DOM injection)
 │       ├── App.jsx            # Main state machine component
-│       ├── index.css          # Tailwind imports + custom animations
+│       ├── index.css          # Tailwind + Apple glass animations
 │       └── components/
-│           ├── FloatingDot.jsx # Selection dot with hover tooltip
-│           └── ResultCard.jsx  # Result card with typing effect
+│           └── ResultCard.jsx  # Result card with Gemini entrance
 ├── lib/                       # AI provider library
 │   ├── api.js                 # Provider registry and factory
 │   ├── utils.js               # Storage helpers and utilities
@@ -139,8 +139,7 @@ ai-grammer-chrome-ext/
 │       ├── nvidia.js          # NVIDIA integration
 │       └── ollama.js          # Ollama local integration
 ├── dist/                      # Built output (npm run build)
-│   ├── content.js
-│   └── content.css
+│   └── content.js             # Bundled content script + inlined CSS
 └── icons/                     # Extension icons
 ```
 
@@ -172,7 +171,7 @@ After building, reload the extension in `chrome://extensions` to see changes.
 
 ## Security
 
-- API keys are stored in `chrome.storage.local` — sandboxed from webpage scripts
+- API keys are stored in `chrome.storage.local` - sandboxed from webpage scripts
 - Keys are **never** synced across devices (no `chrome.storage.sync`)
 - All API calls originate from the extension's service worker context
 - No external analytics, tracking, or telemetry
