@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef, forwardRef } from 'react';
 import ResultCard from './components/ResultCard.jsx';
+import Logo from './components/Logo.jsx';
 
 const PHASES = { IDLE: 0, DOT: 1, LOADING: 2, RESULT: 3, ERROR: 4 };
 
@@ -301,7 +302,10 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, loadin
           [tooltipAbove ? 'marginBottom' : 'marginTop']: 10,
           borderRadius: 12, padding: 6, width: 172,
         }}>
-          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', padding: '4px 10px 6px' }}>Tools</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px 6px' }}>
+            <Logo width={16} height={16} style={{ opacity: 0.5, flexShrink: 0 }} />
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Lexi — AI Writing Assistant</span>
+          </div>
           <button onClick={onFix}
             style={{
               width: '100%', display: 'flex', alignItems: 'center', gap: 10,
