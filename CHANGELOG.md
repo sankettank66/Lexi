@@ -4,7 +4,18 @@ All notable changes to the Lexi extension are documented here.
 
 ---
 
-## v1.2.0 — Branding & Polish
+## v1.3.0 - Change Tone & Agent Skills
+
+- **feat(ui):** Add Change Tone option with hover submenu (Professional, Casual, Formal, Friendly, Concise)
+- **fix(ui):** Make glass surfaces more subtle with higher background opacity
+- **feat(skills):** Add glass design system skill for OpenCode, Claude, and Agents
+- **feat(options):** Add model dropdowns and max tokens per provider
+- **fix(providers):** Strip quotes from LLM responses and fix prompt key mismatch
+- **chore:** Ignore built dist/ output in git
+
+---
+
+## v1.2.0 - Branding & Polish
 
 - **feat(ui):** Add Logo.jsx SVG component and use in content tooltip
 - **feat(brand):** Replace extension icons with new Lexi logo
@@ -13,7 +24,7 @@ All notable changes to the Lexi extension are documented here.
 
 ---
 
-## v1.1.0 — React Rewrite & Glassmorphism Redesign
+## v1.1.0 - React Rewrite & Glassmorphism Redesign
 
 ### Highlights
 - Complete UI rewrite with React 19 + Tailwind CSS v4
@@ -29,7 +40,7 @@ All notable changes to the Lexi extension are documented here.
 - Use Instrument Serif and Instrument Sans fonts
 
 ### Rebrand
-- Rename extension to "Lexi — AI Writing Assistant"
+- Rename extension to "Lexi - AI Writing Assistant"
 - Simplify action IDs: fix-grammar → fix, rephrase → rewrite
 - Update context menu and button labels
 
@@ -42,7 +53,7 @@ All notable changes to the Lexi extension are documented here.
 
 ---
 
-## v1.0.1 — Bug Fixes & UI Enhancements
+## v1.0.1 - Bug Fixes & UI Enhancements
 
 - Resolve critical bugs in provider registration and API key storage
 - Fix CSS isolation and Shadow DOM event retargeting
@@ -54,7 +65,7 @@ All notable changes to the Lexi extension are documented here.
 
 ---
 
-## v1.0.0 — Initial Release
+## v1.0.0 - Initial Release
 
 ### Provider Architecture
 - Abstract BaseProvider class with common interface
