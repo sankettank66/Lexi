@@ -28,6 +28,7 @@ export default function App() {
   const [selInfo, setSelInfo] = useState(null);
   const [action, setAction] = useState(null);
   const [selectedTone, setSelectedTone] = useState(null);
+  const [instruction, setInstruction] = useState(null);
   const [corrected, setCorrected] = useState('');
   const [original, setOriginal] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
@@ -143,14 +144,15 @@ export default function App() {
     return () => { window.removeEventListener('scroll', up, true); window.removeEventListener('resize', up); };
   }, [phase]);
 
-  const doAction = useCallback((act, tone) => {
+  const doAction = useCallback((act, tone, custInstruction) => {
     const info = selRef.current;
     if (!info?.text || processing) return;
     processing = true;
     setAction(act);
     setSelectedTone(tone || null);
+    setInstruction(custInstruction || null);
     setPhase(PHASES.LOADING);
-    chrome.runtime.sendMessage({ action: 'processText', text: info.text, menuItemId: act, tone }, (r) => {
+    chrome.runtime.sendMessage({ action: 'processText', text: info.text, menuItemId: act, tone, instruction: custInstruction }, (r) => {
       processing = false;
       if (chrome.runtime.lastError) { setErrorMsg(chrome.runtime.lastError.message); setPhase(PHASES.ERROR); return; }
       if (r?.error) { setErrorMsg(r.error); setPhase(PHASES.ERROR); return; }
@@ -183,14 +185,14 @@ export default function App() {
     processing = true;
     setOriginal(corrected);
     setPhase(PHASES.LOADING);
-    chrome.runtime.sendMessage({ action: 'processText', text: corrected, menuItemId: action, tone: selectedTone }, (r) => {
+    chrome.runtime.sendMessage({ action: 'processText', text: corrected, menuItemId: action, tone: selectedTone, instruction }, (r) => {
       processing = false;
       if (chrome.runtime.lastError) { setErrorMsg(chrome.runtime.lastError.message); setPhase(PHASES.ERROR); return; }
       if (r?.error) { setErrorMsg(r.error); setPhase(PHASES.ERROR); return; }
       setCorrected(stripOuterQuotes(r.result));
       setPhase(PHASES.RESULT);
     });
-  }, [corrected, action, selectedTone]);
+  }, [corrected, action, selectedTone, instruction]);
 
   const doDecline = useCallback(() => setPhase(PHASES.IDLE), []);
 
@@ -202,10 +204,11 @@ export default function App() {
             loading={phase === PHASES.LOADING}
             onFix={() => doAction('fix')}
             onRewrite={() => doAction('rewrite')}
-            onChangeTone={(tone) => doAction('changeTone', tone)} />
+            onChangeTone={(tone) => doAction('changeTone', tone)}
+            onAskAI={(instr) => doAction('custom', null, instr)} />
         )}
         {phase === PHASES.RESULT && (
-          <ResultCard original={original} corrected={corrected} action={action} tone={selectedTone}
+          <ResultCard original={original} corrected={corrected} action={action} tone={selectedTone} instruction={instruction}
             onAccept={doAccept} onDecline={doDecline} onRefix={doRefix} selInfo={selInfo} />
         )}
         {phase === PHASES.ERROR && <ErrorCard message={errorMsg} onClose={() => setPhase(PHASES.IDLE)} />}
@@ -241,12 +244,19 @@ const loadingPhrases = [
   'Adjusting tone…',
   'Streamlining…',
   'Tuning language…',
+  'Following your instruction…',
+  'Understanding your request…',
+  'Working on it…',
+  'Applying your changes…',
 ];
 
-const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChangeTone, loading }, ref) {
+const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChangeTone, onAskAI, loading }, ref) {
   const [open, setOpen] = useState(false);
   const [toneOpen, setToneOpen] = useState(false);
+  const [customMode, setCustomMode] = useState(false);
+  const [customInput, setCustomInput] = useState('');
   const [loadingPhrase, setLoadingPhrase] = useState('');
+  const inputRef = useRef(null);
 
   useEffect(() => {
     if (!open) return;
@@ -255,6 +265,8 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
       if (ref.current && !path.includes(ref.current)) {
         setOpen(false);
         setToneOpen(false);
+        setCustomMode(false);
+        setCustomInput('');
       }
     };
     document.addEventListener('mousedown', h);
@@ -267,13 +279,27 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
     }
   }, [loading]);
 
+  useEffect(() => {
+    if (customMode && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [customMode]);
+
   const tooltipAbove = y - 130 >= 8;
   const submenuRight = x + 190 > window.innerWidth - 16;
+
+  const handleSend = () => {
+    const val = customInput.trim();
+    if (!val) return;
+    setCustomInput('');
+    setCustomMode(false);
+    onAskAI(val);
+  };
 
   return (
     <div ref={ref} style={{ position: 'fixed', left: x, top: y, zIndex: 2147483647 }}>
       <div
-        onClick={loading ? undefined : () => setOpen(v => !v)}
+        onClick={loading ? undefined : () => { setOpen(v => !v); setCustomMode(false); setCustomInput(''); }}
         className={loading ? 'animate-ai-glass-loading-pulse' : ''}
         style={{
           width: 28, height: 28, borderRadius: '50%',
@@ -318,7 +344,7 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
       )}
 
       {/* Tools tooltip */}
-      {!loading && open && (
+      {!loading && open && !customMode && (
         <div className="ai-glass-tooltip animate-ai-glass-enter" style={{
           position: 'absolute',
           left: '50%', transform: 'translateX(-50%)',
@@ -400,6 +426,78 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
                 ))}
               </div>
             )}
+          </div>
+
+          <button onClick={() => setCustomMode(true)}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center',
+              padding: '9px 12px', borderRadius: 10,
+              fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.88)',
+              background: 'transparent', border: 'none', cursor: 'pointer',
+              transition: 'all 0.15s', textAlign: 'left',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '16px'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.88)'; e.currentTarget.style.paddingLeft = '12px'; }}>
+            Ask AI
+          </button>
+        </div>
+      )}
+
+      {/* Custom input mode */}
+      {!loading && open && customMode && (
+        <div className="ai-glass-tooltip animate-ai-glass-enter" style={{
+          position: 'absolute',
+          left: '50%', transform: 'translateX(-50%)',
+          [tooltipAbove ? 'bottom' : 'top']: '100%',
+          [tooltipAbove ? 'marginBottom' : 'marginTop']: 10,
+          borderRadius: 14, padding: 10, width: 248,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 2px 8px', borderBottom: '1px solid rgba(255,255,255,0.03)', marginBottom: 10 }}>
+            <Logo width={14} height={14} style={{ opacity: 0.45, flexShrink: 0 }} />
+            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Ask AI</span>
+          </div>
+
+          <input ref={inputRef}
+            value={customInput}
+            onChange={e => setCustomInput(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') handleSend(); if (e.key === 'Escape') { setCustomMode(false); setCustomInput(''); } }}
+            placeholder='e.g. make it formal, shorten it, translate...'
+            style={{
+              width: '100%', padding: '10px 12px', borderRadius: 10,
+              fontSize: 13, color: 'rgba(255,255,255,0.85)',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.06)',
+              outline: 'none', resize: 'none',
+              fontFamily: 'inherit',
+              boxSizing: 'border-box',
+            }} />
+
+          <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end', marginTop: 8 }}>
+            <button onClick={() => { setCustomMode(false); setCustomInput(''); }}
+              style={{
+                padding: '7px 14px', borderRadius: 8,
+                fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.55)',
+                background: 'transparent', border: 'none', cursor: 'pointer',
+                transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.85)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; }}>
+              Back
+            </button>
+            <button onClick={handleSend}
+              disabled={!customInput.trim()}
+              style={{
+                padding: '7px 16px', borderRadius: 8,
+                fontSize: 12, fontWeight: 600, color: customInput.trim() ? '#fff' : 'rgba(255,255,255,0.25)',
+                background: customInput.trim() ? 'rgba(59,130,246,0.25)' : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${customInput.trim() ? 'rgba(59,130,246,0.35)' : 'rgba(255,255,255,0.03)'}`,
+                cursor: customInput.trim() ? 'pointer' : 'default',
+                transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => { if (customInput.trim()) { e.currentTarget.style.background = 'rgba(59,130,246,0.4)'; } }}
+              onMouseLeave={e => { if (customInput.trim()) { e.currentTarget.style.background = 'rgba(59,130,246,0.25)'; } }}>
+              Send
+            </button>
           </div>
         </div>
       )}

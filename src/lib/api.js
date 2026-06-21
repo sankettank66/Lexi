@@ -49,8 +49,10 @@
         return provider.rephrase(text);
       case 'changeTone':
         return provider.changeTone(text, extraConfig?.tone || 'professional');
+      case 'custom':
+        return provider.customPrompt(text, extraConfig?.instruction || '');
       default:
-        throw new Error(`Unknown action: "${action}". Use "fix", "rewrite", or "changeTone".`);
+        throw new Error(`Unknown action: "${action}". Use "fix", "rewrite", "changeTone", or "custom".`);
     }
   }
 

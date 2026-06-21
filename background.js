@@ -155,7 +155,7 @@ importScripts(
     }
 
     if (message.action === 'processText') {
-      processText(message.text, message.menuItemId, message.tone)
+      processText(message.text, message.menuItemId, message.tone, message.instruction)
         .then(result => sendResponse({ result }))
         .catch(err => sendResponse({ error: err.message }));
       return true;
@@ -171,7 +171,7 @@ importScripts(
     }
   });
 
-  async function processText(text, menuItemId, tone) {
+  async function processText(text, menuItemId, tone, instruction) {
     console.log('[Lexi] processText:', menuItemId, 'text:', text);
     if (!text || !menuItemId) throw new Error('Missing text or action');
 
@@ -192,6 +192,7 @@ importScripts(
     }
 
     extraConfig.tone = tone;
+    extraConfig.instruction = instruction;
     return AIAPI.callAI(provider, menuItemId, text, apiKey, model, extraConfig);
   }
 

@@ -15,24 +15,28 @@ const btnGlass = {
   border: 'none', cursor: 'pointer', transition: 'all 0.15s',
 };
 
-export default function ResultCard({ original, corrected, action, tone, onAccept, onDecline, onRefix, selInfo }) {
+export default function ResultCard({ original, corrected, action, tone, instruction, onAccept, onDecline, onRefix, selInfo }) {
   const cardRef = useRef(null);
 
   const isRewrite = action === 'rewrite';
   const isChangeTone = action === 'changeTone';
+  const isCustom = action === 'custom';
 
   const toneLabel = tone ? TONE_OPTIONS.find(t => t.id === tone)?.label || tone : null;
 
   const titleLabel = isChangeTone
     ? `Change Tone${toneLabel ? ` - ${toneLabel}` : ''}`
+    : isCustom ? `Ask AI${instruction ? ` - ${instruction}` : ''}`
     : isRewrite ? 'Rewrite' : 'Fix';
 
   const actionLabel = isChangeTone
     ? `Changed Tone${toneLabel ? ` - ${toneLabel}` : ''}`
+    : isCustom ? 'Result'
     : isRewrite ? 'Rewritten' : 'Corrected';
 
   const againLabel = isChangeTone
     ? 'Change Tone Again'
+    : isCustom ? 'Ask Again'
     : isRewrite ? 'Rewrite Again' : 'Fix Again';
 
   const getPos = () => {
