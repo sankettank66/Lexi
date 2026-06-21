@@ -4,6 +4,16 @@ All notable changes to the Lexi extension are documented here.
 
 ---
 
+## v1.4.0 - Ask AI & Theme-Aware Glass
+
+- **feat(ui):** Add Ask AI mode with inline text input for custom instructions
+- **feat(ui):** Theme-aware glass — adapts to light/dark page backgrounds
+- **feat(ui):** Add Instrument Serif font to tooltip headers
+- **fix(ui):** Dynamic tooltip positioning — clamps to viewport, opens above/below based on space
+- **fix(ui):** Result card falls back to centered modal when selection is near viewport edge
+
+---
+
 ## v1.3.0 - Change Tone & Agent Skills
 
 - **feat(ui):** Add Change Tone option with hover submenu (Professional, Casual, Formal, Friendly, Concise)

@@ -1,4 +1,5 @@
 import React, { useRef } from 'react';
+import Logo from './Logo.jsx';
 
 const ACCENT = '#3b82f6';
 
@@ -15,7 +16,7 @@ const btnGlass = {
   border: 'none', cursor: 'pointer', transition: 'all 0.15s',
 };
 
-export default function ResultCard({ original, corrected, action, tone, instruction, onAccept, onDecline, onRefix, selInfo }) {
+export default function ResultCard({ original, corrected, action, tone, instruction, onAccept, onDecline, onRefix, selInfo, pageTheme }) {
   const cardRef = useRef(null);
 
   const isRewrite = action === 'rewrite';
@@ -65,22 +66,18 @@ export default function ResultCard({ original, corrected, action, tone, instruct
 
   return (
     <div ref={cardRef}
-      className="ai-glass-elevated animate-ai-glass-enter"
+      className={`${pageTheme === 'light' ? 'ai-glass-elevated-light' : 'ai-glass-elevated'} animate-ai-glass-enter`}
       style={{
         ...pos, position: 'fixed', zIndex: 2147483647,
         width: 400, maxWidth: 'calc(100vw - 32px)', maxHeight: 'calc(100vh - 32px)',
         borderRadius: 16, overflow: 'hidden',
       }}>
       {/* Header */}
-      <div className="ai-glass-header" style={{
+      <div className={`${pageTheme === 'light' ? 'ai-glass-header-light' : 'ai-glass-header'}`} style={{
         display: 'flex', alignItems: 'center', gap: 10,
         padding: '12px 16px',
       }}>
-        <span style={{
-          width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
-          background: ACCENT,
-          boxShadow: `0 0 8px ${ACCENT}55`,
-        }} />
+        <Logo width={14} height={14} style={{ opacity: pageTheme === 'light' ? 0.65 : 0.45, flexShrink: 0 }} />
         <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           {titleLabel}
         </span>
@@ -103,7 +100,7 @@ export default function ResultCard({ original, corrected, action, tone, instruct
       </div>
 
       {/* Footer */}
-      <div className="ai-glass-header" style={{
+      <div className={`${pageTheme === 'light' ? 'ai-glass-header-light' : 'ai-glass-header'}`} style={{
         display: 'flex', gap: 8, justifyContent: 'flex-end',
         padding: '10px 16px',
       }}>

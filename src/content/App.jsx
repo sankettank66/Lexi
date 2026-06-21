@@ -33,6 +33,7 @@ export default function App() {
   const [corrected, setCorrected] = useState('');
   const [original, setOriginal] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [pageTheme, setPageTheme] = useState('dark');
   const dotRef = useRef(null);
   const selRef = useRef(null);
   const phaseRef = useRef(phase);
@@ -65,6 +66,15 @@ export default function App() {
     };
     chrome.runtime.onMessage.addListener(h);
     return () => chrome.runtime.onMessage.removeListener(h);
+  }, []);
+
+  useEffect(() => {
+    const bg = getComputedStyle(document.body).backgroundColor;
+    const m = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (m) {
+      const lum = 0.299 * +m[1] + 0.587 * +m[2] + 0.114 * +m[3];
+      setPageTheme(lum > 160 ? 'light' : 'dark');
+    }
   }, []);
 
   const capture = useCallback(() => {
@@ -213,13 +223,14 @@ export default function App() {
             onChangeTone={(tone) => doAction('changeTone', tone)}
             onAskAI={(instr) => doAction('custom', null, instr)}
             resumeInstruction={resumeInstruction}
-            onClearResume={() => setResumeInstruction(null)} />
+            onClearResume={() => setResumeInstruction(null)}
+            pageTheme={pageTheme} />
         )}
         {phase === PHASES.RESULT && (
           <ResultCard original={original} corrected={corrected} action={action} tone={selectedTone} instruction={instruction}
-            onAccept={doAccept} onDecline={doDecline} onRefix={doRefix} selInfo={selInfo} />
+            onAccept={doAccept} onDecline={doDecline} onRefix={doRefix} selInfo={selInfo} pageTheme={pageTheme} />
         )}
-        {phase === PHASES.ERROR && <ErrorCard message={errorMsg} onClose={() => setPhase(PHASES.IDLE)} />}
+        {phase === PHASES.ERROR && <ErrorCard message={errorMsg} onClose={() => setPhase(PHASES.IDLE)} pageTheme={pageTheme} />}
       </div>
     </div>
   );
@@ -258,13 +269,14 @@ const loadingPhrases = [
   'Applying your changes…',
 ];
 
-const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChangeTone, onAskAI, loading, resumeInstruction, onClearResume }, ref) {
+const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChangeTone, onAskAI, loading, resumeInstruction, onClearResume, pageTheme }, ref) {
   const [open, setOpen] = useState(false);
   const [toneOpen, setToneOpen] = useState(false);
   const [customMode, setCustomMode] = useState(false);
   const [customInput, setCustomInput] = useState('');
   const [loadingPhrase, setLoadingPhrase] = useState('');
   const inputRef = useRef(null);
+  const toneLeaveRef = useRef(null);
 
   useEffect(() => {
     if (resumeInstruction) {
@@ -337,7 +349,9 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
         className={loading ? 'animate-ai-glass-loading-pulse' : ''}
         style={{
           width: 28, height: 28, borderRadius: '50%',
-          background: loading ? 'rgba(59,130,246,0.22)' : 'rgba(59,130,246,0.16)',
+          background: loading
+            ? (pageTheme === 'light' ? 'rgba(59,130,246,0.35)' : 'rgba(59,130,246,0.22)')
+            : (pageTheme === 'light' ? 'rgba(59,130,246,0.28)' : 'rgba(59,130,246,0.16)'),
           backdropFilter: 'blur(50px)',
           WebkitBackdropFilter: 'blur(50px)',
           border: '1px solid rgba(255,255,255,0.06)',
@@ -363,7 +377,7 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
 
       {/* Loading tooltip with cycling phrases */}
       {loading && (
-        <div className="ai-glass-tooltip animate-ai-glass-enter" style={{
+        <div className={`${pageTheme === 'light' ? 'ai-glass-tooltip-light' : 'ai-glass-tooltip'} animate-ai-glass-enter`} style={{
           position: 'fixed', left: loadingPos.left, top: loadingPos.top,
           borderRadius: 10, padding: '8px 14px',
           whiteSpace: 'nowrap',
@@ -376,13 +390,13 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
 
       {/* Tools tooltip */}
       {!loading && open && !customMode && (
-        <div className="ai-glass-tooltip animate-ai-glass-enter" style={{
+        <div className={`${pageTheme === 'light' ? 'ai-glass-tooltip-light' : 'ai-glass-tooltip'} animate-ai-glass-enter`} style={{
           position: 'fixed', left: toolsPos.left, top: toolsPos.top,
           borderRadius: 14, padding: 8, width: TOOLS_W,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 10px 8px', borderBottom: '1px solid rgba(255,255,255,0.03)', marginBottom: 4 }}>
             <Logo width={14} height={14} style={{ opacity: 0.45, flexShrink: 0 }} />
-            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Lexi - Assistant</span>
+            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: "'Instrument Serif', serif" }}>Lexi - Assistant</span>
           </div>
 
           <button onClick={onFix}
@@ -412,10 +426,10 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
           </button>
 
           <div style={{ position: 'relative' }}
-            onMouseEnter={() => setToneOpen(true)}
-            onMouseLeave={() => setToneOpen(false)}>
+            onMouseEnter={() => { if (toneLeaveRef.current) clearTimeout(toneLeaveRef.current); setToneOpen(true); }}
+            onMouseLeave={() => { toneLeaveRef.current = setTimeout(() => setToneOpen(false), 120); }}>
             <button
-              onClick={() => setToneOpen(v => !v)}
+              onClick={() => { if (toneLeaveRef.current) clearTimeout(toneLeaveRef.current); setToneOpen(v => !v); }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '16px'; }}
               onMouseLeave={e => { e.currentTarget.style.background = toneOpen ? 'rgba(59,130,246,0.1)' : 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.88)'; e.currentTarget.style.paddingLeft = '12px'; }}
               style={{
@@ -430,7 +444,10 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
               <span style={{ marginLeft: 'auto', fontSize: 9, color: 'rgba(255,255,255,0.35)', transition: 'transform 0.15s', transform: toneOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>&#9654;</span>
             </button>
             {toneOpen && (
-              <div className="ai-glass-tooltip animate-ai-glass-enter" style={{
+              <div className="ai-glass-tooltip animate-ai-glass-enter"
+                onMouseEnter={() => { if (toneLeaveRef.current) clearTimeout(toneLeaveRef.current); }}
+                onMouseLeave={() => { toneLeaveRef.current = setTimeout(() => setToneOpen(false), 120); }}
+                style={{
                 position: 'absolute',
                 [submenuRight ? 'right' : 'left']: '100%',
                 top: 0,
@@ -473,13 +490,13 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
 
       {/* Custom input mode */}
       {!loading && open && customMode && (
-        <div className="ai-glass-tooltip animate-ai-glass-enter" style={{
+        <div className={`${pageTheme === 'light' ? 'ai-glass-tooltip-light' : 'ai-glass-tooltip'} animate-ai-glass-enter`} style={{
           position: 'fixed', left: customPos.left, top: customPos.top,
           borderRadius: 14, padding: 10, width: CUSTOM_W,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 2px 8px', borderBottom: '1px solid rgba(255,255,255,0.03)', marginBottom: 10 }}>
             <Logo width={14} height={14} style={{ opacity: 0.45, flexShrink: 0 }} />
-            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Ask AI</span>
+            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', fontFamily: "'Instrument Serif', serif" }}>Ask AI</span>
           </div>
 
           <input ref={inputRef}
@@ -531,25 +548,25 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
 });
 
 /* ─── ErrorCard - Apple glass with neutral red accent ─── */
-function ErrorCard({ message, onClose }) {
+function ErrorCard({ message, onClose, pageTheme }) {
   return (
     <div className="ai-glass-overlay" style={{
       position: 'fixed', inset: 0, zIndex: 2147483647,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       pointerEvents: 'auto',
     }}>
-      <div className="ai-glass-elevated animate-ai-glass-enter" style={{
+      <div className={`${pageTheme === 'light' ? 'ai-glass-elevated-light' : 'ai-glass-elevated'} animate-ai-glass-enter`} style={{
         maxWidth: 400, width: 'calc(100vw - 32px)',
         borderRadius: 16, overflow: 'hidden',
       }}>
-        <div className="ai-glass-header" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px' }}>
+        <div className={`${pageTheme === 'light' ? 'ai-glass-header-light' : 'ai-glass-header'}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 16px' }}>
           <span style={{ color: '#ef4444', fontSize: 15, opacity: 0.7 }}>&#9888;</span>
           <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Error</span>
         </div>
         <div style={{ padding: 16 }}>
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 1.5, margin: 0 }}>{message}</p>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '10px 16px' }} className="ai-glass-header">
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '10px 16px' }} className={`${pageTheme === 'light' ? 'ai-glass-header-light' : 'ai-glass-header'}`}>
           <button onClick={onClose}
             className="ai-glass-btn"
             style={{

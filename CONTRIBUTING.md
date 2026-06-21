@@ -42,21 +42,19 @@ dist/                 # Build output (content.js only)
 
 ## Commit Guidelines
 
-Use conventional commits:
+Use conventional commits with scopes and bullet-point body:
 
 ```
-feat: add NVIDIA AI provider
-fix: correct Shadow DOM event retargeting
-docs: update README with architecture
-refactor: restructure project into src/
-chore: add CI/CD workflow
+<type>(<scope>): <subject>
+
+- <what was changed and why (max 72 chars per line)>
+- <if a bullet exceeds 72 chars, wrap to a new indented line>
 ```
 
-A commit message template is available at `.gitmessage`. Enable it with:
-
-```bash
-git config commit.template .gitmessage
-```
+- **Type**: `feat`, `fix`, `docs`, `refactor`, `chore`, `style`, `perf`, `test`
+- **Scope**: `ui`, `api`, `lib`, `config`, `build`, `docs`, `infra`, `skill`
+- **Subject**: imperative mood, no period, no leading cap
+- **Body**: `-` bullet points, wrap at 72 characters, blank line after subject
 
 ## Pull Request Process
 
