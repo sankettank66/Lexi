@@ -267,41 +267,43 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
     }
   }, [loading]);
 
-  const POP_HEIGHT = 120;
-  const tooltipAbove = y - POP_HEIGHT >= 8;
+  const tooltipAbove = y - 130 >= 8;
+  const submenuRight = x + 190 > window.innerWidth - 16;
 
   return (
     <div ref={ref} style={{ position: 'fixed', left: x, top: y, zIndex: 2147483647 }}>
       <div
         onClick={loading ? undefined : () => setOpen(v => !v)}
+        className={loading ? 'animate-ai-glass-loading-pulse' : ''}
         style={{
-          width: 26, height: 26, borderRadius: '50%',
-          background: loading ? 'rgba(59,130,246,0.15)' : 'rgba(59,130,246,0.12)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
+          width: 28, height: 28, borderRadius: '50%',
+          background: loading ? 'rgba(59,130,246,0.22)' : 'rgba(59,130,246,0.16)',
+          backdropFilter: 'blur(50px)',
+          WebkitBackdropFilter: 'blur(50px)',
           border: '1px solid rgba(255,255,255,0.06)',
           cursor: loading ? 'default' : 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#fff',
-          transition: 'transform 0.15s, box-shadow 0.15s',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.35)',
+          transition: 'transform 0.2s cubic-bezier(0.16,1,0.3,1), box-shadow 0.2s ease',
+          boxShadow: loading
+            ? '0 0 20px rgba(59,130,246,0.25), 0 2px 12px rgba(0,0,0,0.35)'
+            : '0 2px 12px rgba(0,0,0,0.35)',
         }}
-        onMouseEnter={loading ? undefined : e => { e.currentTarget.style.transform = 'scale(1.18)'; e.currentTarget.style.boxShadow = '0 0 20px rgba(59,130,246,0.25), 0 2px 8px rgba(0,0,0,0.35)'; }}
+        onMouseEnter={loading ? undefined : e => { e.currentTarget.style.transform = 'scale(1.2)'; e.currentTarget.style.boxShadow = '0 0 24px rgba(59,130,246,0.3), 0 2px 8px rgba(0,0,0,0.35)'; }}
         onMouseLeave={loading ? undefined : e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.35)'; }}
-        onMouseDown={loading ? undefined : e => e.currentTarget.style.transform = 'scale(0.92)'}
-        onMouseUp={loading ? undefined : e => e.currentTarget.style.transform = 'scale(1.18)'}
+        onMouseDown={loading ? undefined : e => e.currentTarget.style.transform = 'scale(0.9)'}
+        onMouseUp={loading ? undefined : e => e.currentTarget.style.transform = 'scale(1.2)'}
         aria-label={loading ? `Lexi - ${loadingPhrase}` : 'Lexi - AI Writing Assistant'}>
         {loading ? (
           <span className="animate-ai-glass-spin"
             style={{ display: 'block', width: 14, height: 14, borderRadius: '50%', border: '2px solid rgba(59,130,246,0.2)', borderTopColor: '#3b82f6' }} />
         ) : (
-          <span style={{ fontSize: 13 }}>✨</span>
+          <Logo width={14} height={14} />
         )}
       </div>
 
       {/* Loading tooltip with cycling phrases */}
       {loading && (
-        <div className="ai-glass-tooltip" style={{
+        <div className="ai-glass-tooltip animate-ai-glass-enter" style={{
           position: 'absolute',
           left: '50%', transform: 'translateX(-50%)',
           [tooltipAbove ? 'bottom' : 'top']: '100%',
@@ -317,86 +319,83 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
 
       {/* Tools tooltip */}
       {!loading && open && (
-        <div className="ai-glass-tooltip" style={{
+        <div className="ai-glass-tooltip animate-ai-glass-enter" style={{
           position: 'absolute',
           left: '50%', transform: 'translateX(-50%)',
           [tooltipAbove ? 'bottom' : 'top']: '100%',
           [tooltipAbove ? 'marginBottom' : 'marginTop']: 10,
-          borderRadius: 12, padding: 6, width: 172,
+          borderRadius: 14, padding: 8, width: 196,
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px 6px' }}>
-            <Logo width={16} height={16} style={{ opacity: 0.5, flexShrink: 0 }} />
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Lexi</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 10px 8px', borderBottom: '1px solid rgba(255,255,255,0.03)', marginBottom: 4 }}>
+            <Logo width={14} height={14} style={{ opacity: 0.45, flexShrink: 0 }} />
+            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Lexi - Assistant</span>
           </div>
+
           <button onClick={onFix}
             style={{
-              width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-              padding: '8px 12px', borderRadius: 8,
-              fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.85)',
+              width: '100%', display: 'flex', alignItems: 'center',
+              padding: '9px 12px', borderRadius: 10,
+              fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.88)',
               background: 'transparent', border: 'none', cursor: 'pointer',
-              transition: 'background 0.15s',
+              transition: 'all 0.15s', textAlign: 'left',
             }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(59,130,246,0.12)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#3b82f6', flexShrink: 0, boxShadow: '0 0 6px rgba(59,130,246,0.4)' }} />
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '16px'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.88)'; e.currentTarget.style.paddingLeft = '12px'; }}>
             Fix
           </button>
+
           <button onClick={onRewrite}
             style={{
-              width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-              padding: '8px 12px', borderRadius: 8,
-              fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.85)',
+              width: '100%', display: 'flex', alignItems: 'center',
+              padding: '9px 12px', borderRadius: 10,
+              fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.88)',
               background: 'transparent', border: 'none', cursor: 'pointer',
-              transition: 'background 0.15s',
+              transition: 'all 0.15s', textAlign: 'left',
             }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(59,130,246,0.12)'}
-            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#3b82f6', flexShrink: 0, boxShadow: '0 0 6px rgba(59,130,246,0.4)' }} />
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '16px'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.88)'; e.currentTarget.style.paddingLeft = '12px'; }}>
             Rewrite
           </button>
+
           <div style={{ position: 'relative' }}
             onMouseEnter={() => setToneOpen(true)}
             onMouseLeave={() => setToneOpen(false)}>
             <button
               onClick={() => setToneOpen(v => !v)}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.12)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '16px'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = toneOpen ? 'rgba(59,130,246,0.1)' : 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.88)'; e.currentTarget.style.paddingLeft = '12px'; }}
               style={{
-                width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                padding: '8px 12px', borderRadius: 8,
-                fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.85)',
-                background: toneOpen ? 'rgba(59,130,246,0.12)' : 'transparent', border: 'none', cursor: 'pointer',
-                transition: 'background 0.15s',
+                width: '100%', display: 'flex', alignItems: 'center',
+                padding: '9px 12px', borderRadius: 10,
+                fontSize: 13, fontWeight: 500, color: toneOpen ? '#fff' : 'rgba(255,255,255,0.88)',
+                background: toneOpen ? 'rgba(59,130,246,0.1)' : 'transparent',
+                border: 'none', cursor: 'pointer', textAlign: 'left',
+                transition: 'all 0.15s',
               }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#3b82f6', flexShrink: 0, boxShadow: '0 0 6px rgba(59,130,246,0.4)' }} />
               Change Tone
-              <span style={{ marginLeft: 'auto', fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>&#9654;</span>
+              <span style={{ marginLeft: 'auto', fontSize: 9, color: 'rgba(255,255,255,0.35)', transition: 'transform 0.15s', transform: toneOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}>&#9654;</span>
             </button>
             {toneOpen && (
-              <div style={{
+              <div className="ai-glass-tooltip animate-ai-glass-enter" style={{
                 position: 'absolute',
-                left: '100%', top: 0,
-                marginLeft: 6,
+                [submenuRight ? 'right' : 'left']: '100%',
+                top: 0,
+                [submenuRight ? 'marginRight' : 'marginLeft']: 6,
                 borderRadius: 12, padding: 6,
-                width: 160,
-                background: 'rgba(30,32,40,0.75)',
-                backdropFilter: 'blur(24px)',
-                WebkitBackdropFilter: 'blur(24px)',
-                border: '1px solid rgba(255,255,255,0.04)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
+                width: 155,
               }}>
                 {TONE_OPTIONS.map(t => (
                   <button key={t.id} onClick={() => onChangeTone(t.id)}
                     style={{
-                      width: '100%', display: 'flex', alignItems: 'center', gap: 10,
-                      padding: '7px 10px', borderRadius: 8,
-                      fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.85)',
-                      background: 'transparent', border: 'none', cursor: 'pointer',
-                      transition: 'background 0.15s',
+                      width: '100%', display: 'flex', alignItems: 'center',
+                      padding: '8px 10px', borderRadius: 8,
+                      fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.82)',
+                      background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left',
+                      transition: 'all 0.15s',
                     }}
-                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(59,130,246,0.12)'}
-                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
-                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', flexShrink: 0 }}>{t.label}</span>
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '14px'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.82)'; e.currentTarget.style.paddingLeft = '10px'; }}>
+                    {t.label}
                   </button>
                 ))}
               </div>

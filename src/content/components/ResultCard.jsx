@@ -24,11 +24,11 @@ export default function ResultCard({ original, corrected, action, tone, onAccept
   const toneLabel = tone ? TONE_OPTIONS.find(t => t.id === tone)?.label || tone : null;
 
   const titleLabel = isChangeTone
-    ? `Change Tone${toneLabel ? ` — ${toneLabel}` : ''}`
+    ? `Change Tone${toneLabel ? ` - ${toneLabel}` : ''}`
     : isRewrite ? 'Rewrite' : 'Fix';
 
   const actionLabel = isChangeTone
-    ? `Changed Tone${toneLabel ? ` — ${toneLabel}` : ''}`
+    ? `Changed Tone${toneLabel ? ` - ${toneLabel}` : ''}`
     : isRewrite ? 'Rewritten' : 'Corrected';
 
   const againLabel = isChangeTone
