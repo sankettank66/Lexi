@@ -4,6 +4,14 @@ import Logo from './components/Logo.jsx';
 
 const PHASES = { IDLE: 0, DOT: 1, LOADING: 2, RESULT: 3, ERROR: 4 };
 
+const TONE_OPTIONS = [
+  { id: 'professional', label: 'Professional', description: 'Formal, polished, business-appropriate' },
+  { id: 'casual', label: 'Casual', description: 'Relaxed, conversational, friendly' },
+  { id: 'formal', label: 'Formal', description: 'Academic, precise, structured' },
+  { id: 'friendly', label: 'Friendly', description: 'Warm, approachable, personable' },
+  { id: 'concise', label: 'Concise', description: 'Brief, direct, to-the-point' },
+];
+
 let processing = false;
 
 function stripOuterQuotes(text) {
@@ -19,6 +27,7 @@ export default function App() {
   const [dotPos, setDotPos] = useState({ x: 0, y: 0 });
   const [selInfo, setSelInfo] = useState(null);
   const [action, setAction] = useState(null);
+  const [selectedTone, setSelectedTone] = useState(null);
   const [corrected, setCorrected] = useState('');
   const [original, setOriginal] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
@@ -42,6 +51,7 @@ export default function App() {
         setOriginal(msg.original);
         setCorrected(stripOuterQuotes(msg.corrected));
         setAction(msg.menuItemId);
+        setSelectedTone(msg.tone || null);
         setPhase(PHASES.RESULT);
         sendResponse({ ok: true });
       } else if (msg.action === 'showError') {
@@ -133,13 +143,14 @@ export default function App() {
     return () => { window.removeEventListener('scroll', up, true); window.removeEventListener('resize', up); };
   }, [phase]);
 
-  const doAction = useCallback((act) => {
+  const doAction = useCallback((act, tone) => {
     const info = selRef.current;
     if (!info?.text || processing) return;
     processing = true;
     setAction(act);
+    setSelectedTone(tone || null);
     setPhase(PHASES.LOADING);
-    chrome.runtime.sendMessage({ action: 'processText', text: info.text, menuItemId: act }, (r) => {
+    chrome.runtime.sendMessage({ action: 'processText', text: info.text, menuItemId: act, tone }, (r) => {
       processing = false;
       if (chrome.runtime.lastError) { setErrorMsg(chrome.runtime.lastError.message); setPhase(PHASES.ERROR); return; }
       if (r?.error) { setErrorMsg(r.error); setPhase(PHASES.ERROR); return; }
@@ -172,14 +183,14 @@ export default function App() {
     processing = true;
     setOriginal(corrected);
     setPhase(PHASES.LOADING);
-    chrome.runtime.sendMessage({ action: 'processText', text: corrected, menuItemId: action }, (r) => {
+    chrome.runtime.sendMessage({ action: 'processText', text: corrected, menuItemId: action, tone: selectedTone }, (r) => {
       processing = false;
       if (chrome.runtime.lastError) { setErrorMsg(chrome.runtime.lastError.message); setPhase(PHASES.ERROR); return; }
       if (r?.error) { setErrorMsg(r.error); setPhase(PHASES.ERROR); return; }
       setCorrected(stripOuterQuotes(r.result));
       setPhase(PHASES.RESULT);
     });
-  }, [corrected, action]);
+  }, [corrected, action, selectedTone]);
 
   const doDecline = useCallback(() => setPhase(PHASES.IDLE), []);
 
@@ -190,10 +201,11 @@ export default function App() {
           <InlineDot ref={dotRef} x={dotPos.x} y={dotPos.y}
             loading={phase === PHASES.LOADING}
             onFix={() => doAction('fix')}
-            onRewrite={() => doAction('rewrite')} />
+            onRewrite={() => doAction('rewrite')}
+            onChangeTone={(tone) => doAction('changeTone', tone)} />
         )}
         {phase === PHASES.RESULT && (
-          <ResultCard original={original} corrected={corrected} action={action}
+          <ResultCard original={original} corrected={corrected} action={action} tone={selectedTone}
             onAccept={doAccept} onDecline={doDecline} onRefix={doRefix} selInfo={selInfo} />
         )}
         {phase === PHASES.ERROR && <ErrorCard message={errorMsg} onClose={() => setPhase(PHASES.IDLE)} />}
@@ -231,8 +243,9 @@ const loadingPhrases = [
   'Tuning language…',
 ];
 
-const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, loading }, ref) {
+const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChangeTone, loading }, ref) {
   const [open, setOpen] = useState(false);
+  const [toneOpen, setToneOpen] = useState(false);
   const [loadingPhrase, setLoadingPhrase] = useState('');
 
   useEffect(() => {
@@ -241,6 +254,7 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, loadin
       const path = e.composedPath ? e.composedPath() : [e.target];
       if (ref.current && !path.includes(ref.current)) {
         setOpen(false);
+        setToneOpen(false);
       }
     };
     document.addEventListener('mousedown', h);
@@ -312,7 +326,7 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, loadin
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '4px 10px 6px' }}>
             <Logo width={16} height={16} style={{ opacity: 0.5, flexShrink: 0 }} />
-            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Lexi — AI Writing Assistant</span>
+            <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Lexi</span>
           </div>
           <button onClick={onFix}
             style={{
@@ -340,6 +354,54 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, loadin
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#3b82f6', flexShrink: 0, boxShadow: '0 0 6px rgba(59,130,246,0.4)' }} />
             Rewrite
           </button>
+          <div style={{ position: 'relative' }}
+            onMouseEnter={() => setToneOpen(true)}
+            onMouseLeave={() => setToneOpen(false)}>
+            <button
+              onClick={() => setToneOpen(v => !v)}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.12)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+              style={{
+                width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                padding: '8px 12px', borderRadius: 8,
+                fontSize: 13, fontWeight: 500, color: 'rgba(255,255,255,0.85)',
+                background: toneOpen ? 'rgba(59,130,246,0.12)' : 'transparent', border: 'none', cursor: 'pointer',
+                transition: 'background 0.15s',
+              }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#3b82f6', flexShrink: 0, boxShadow: '0 0 6px rgba(59,130,246,0.4)' }} />
+              Change Tone
+              <span style={{ marginLeft: 'auto', fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>&#9654;</span>
+            </button>
+            {toneOpen && (
+              <div style={{
+                position: 'absolute',
+                left: '100%', top: 0,
+                marginLeft: 6,
+                borderRadius: 12, padding: 6,
+                width: 160,
+                background: 'rgba(30,32,40,0.75)',
+                backdropFilter: 'blur(24px)',
+                WebkitBackdropFilter: 'blur(24px)',
+                border: '1px solid rgba(255,255,255,0.04)',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.45)',
+              }}>
+                {TONE_OPTIONS.map(t => (
+                  <button key={t.id} onClick={() => onChangeTone(t.id)}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '7px 10px', borderRadius: 8,
+                      fontSize: 12, fontWeight: 500, color: 'rgba(255,255,255,0.85)',
+                      background: 'transparent', border: 'none', cursor: 'pointer',
+                      transition: 'background 0.15s',
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(59,130,246,0.12)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
+                    <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', flexShrink: 0 }}>{t.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -2,15 +2,38 @@ import React, { useRef } from 'react';
 
 const ACCENT = '#3b82f6';
 
+const TONE_OPTIONS = [
+  { id: 'professional', label: 'Professional' },
+  { id: 'casual', label: 'Casual' },
+  { id: 'formal', label: 'Formal' },
+  { id: 'friendly', label: 'Friendly' },
+  { id: 'concise', label: 'Concise' },
+];
+
 const btnGlass = {
   padding: '8px 16px', borderRadius: 8, fontSize: 12, fontWeight: 500,
   border: 'none', cursor: 'pointer', transition: 'all 0.15s',
 };
 
-export default function ResultCard({ original, corrected, action, onAccept, onDecline, onRefix, selInfo }) {
+export default function ResultCard({ original, corrected, action, tone, onAccept, onDecline, onRefix, selInfo }) {
   const cardRef = useRef(null);
 
   const isRewrite = action === 'rewrite';
+  const isChangeTone = action === 'changeTone';
+
+  const toneLabel = tone ? TONE_OPTIONS.find(t => t.id === tone)?.label || tone : null;
+
+  const titleLabel = isChangeTone
+    ? `Change Tone${toneLabel ? ` — ${toneLabel}` : ''}`
+    : isRewrite ? 'Rewrite' : 'Fix';
+
+  const actionLabel = isChangeTone
+    ? `Changed Tone${toneLabel ? ` — ${toneLabel}` : ''}`
+    : isRewrite ? 'Rewritten' : 'Corrected';
+
+  const againLabel = isChangeTone
+    ? 'Change Tone Again'
+    : isRewrite ? 'Rewrite Again' : 'Fix Again';
 
   const getPos = () => {
     const info = selInfo;
@@ -51,7 +74,7 @@ export default function ResultCard({ original, corrected, action, onAccept, onDe
           boxShadow: `0 0 8px ${ACCENT}55`,
         }} />
         <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-          {isRewrite ? 'Rewrite' : 'Fix'}
+          {titleLabel}
         </span>
       </div>
 
@@ -63,7 +86,7 @@ export default function ResultCard({ original, corrected, action, onAccept, onDe
         </div>
         <div className="animate-ai-glass-fade" style={{ animationDelay: '0.1s' }}>
           <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>
-            {isRewrite ? 'Rewritten' : 'Corrected'}
+            {actionLabel}
           </div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.8)', fontWeight: 450, lineHeight: 1.6, wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
             {corrected}
@@ -93,7 +116,7 @@ export default function ResultCard({ original, corrected, action, onAccept, onDe
           }}
           onMouseEnter={e => { e.currentTarget.style.background = `${ACCENT}35`; }}
           onMouseLeave={e => { e.currentTarget.style.background = `${ACCENT}18`; }}>
-          {isRewrite ? 'Rewrite Again' : 'Fix Again'}
+          {againLabel}
         </button>
         <button onClick={onAccept}
           style={{

@@ -47,8 +47,10 @@
         return provider.fixGrammar(text);
       case 'rewrite':
         return provider.rephrase(text);
+      case 'changeTone':
+        return provider.changeTone(text, extraConfig?.tone || 'professional');
       default:
-        throw new Error(`Unknown action: "${action}". Use "fix" or "rewrite".`);
+        throw new Error(`Unknown action: "${action}". Use "fix", "rewrite", or "changeTone".`);
     }
   }
 

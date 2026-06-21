@@ -34,10 +34,11 @@
       return false;
     }
 
-    buildPrompt(action, text) {
+    buildPrompt(action, text, tone) {
       const prompts = {
         'fix': `You are a professional proofreader and grammar expert. Fix any grammar, spelling, punctuation, and word choice errors in the following text. Return ONLY the corrected text without any explanations, quotes, or additional formatting. Do not change the meaning or tone of the original text unless it contains errors. Do not wrap the result in quotes.\n\nText: ${text}`,
-        'rewrite': `You are a professional writing assistant. Rewrite the following text to improve clarity, flow, and readability while preserving the original meaning and tone. Return ONLY the rewritten text without any explanations, quotes, or additional formatting. Do not wrap the result in quotes.\n\nText: ${text}`
+        'rewrite': `You are a professional writing assistant. Rewrite the following text to improve clarity, flow, and readability while preserving the original meaning and tone. Return ONLY the rewritten text without any explanations, quotes, or additional formatting. Do not wrap the result in quotes.\n\nText: ${text}`,
+        'changeTone': `You are a professional writing assistant. Rewrite the following text in a ${tone || 'professional'} tone while preserving the original meaning. Return ONLY the rewritten text without any explanations, quotes, or additional formatting. Do not wrap the result in quotes.\n\nText: ${text}`
       };
       return prompts[action] || prompts['fix'];
     }
@@ -49,6 +50,11 @@
 
     async rephrase(text) {
       const prompt = this.buildPrompt('rewrite', text);
+      return this.callAPI(prompt);
+    }
+
+    async changeTone(text, tone) {
+      const prompt = this.buildPrompt('changeTone', text, tone);
       return this.callAPI(prompt);
     }
 

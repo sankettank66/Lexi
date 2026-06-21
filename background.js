@@ -12,11 +12,21 @@ importScripts(
 );
 
 (function () {
+  const TONE_OPTIONS = [
+    { id: 'professional', label: 'Professional' },
+    { id: 'casual', label: 'Casual' },
+    { id: 'formal', label: 'Formal' },
+    { id: 'friendly', label: 'Friendly' },
+    { id: 'concise', label: 'Concise' },
+  ];
+
   const MENU_IDS = {
     SEPARATOR: 'lexi-separator',
     FIX: 'fix',
     REWRITE: 'rewrite'
   };
+
+  const TONE_MENU_PARENT = 'lexi-tone';
 
   chrome.runtime.onInstalled.addListener((details) => {
     if (details.reason === 'install') {
@@ -48,6 +58,22 @@ importScripts(
         title: 'Rewrite',
         contexts: ['selection']
       });
+
+      chrome.contextMenus.create({
+        id: TONE_MENU_PARENT,
+        parentId: 'lexi-parent',
+        title: 'Change Tone',
+        contexts: ['selection']
+      });
+
+      TONE_OPTIONS.forEach(t => {
+        chrome.contextMenus.create({
+          id: `changeTone::${t.id}`,
+          parentId: TONE_MENU_PARENT,
+          title: t.label,
+          contexts: ['selection']
+        });
+      });
     });
   }
 
@@ -55,8 +81,16 @@ importScripts(
     const text = Utils.sanitizeText(info.selectionText);
     if (!text) return;
 
-    const action = info.menuItemId;
-    if (action !== MENU_IDS.FIX && action !== MENU_IDS.REWRITE) return;
+    const rawAction = info.menuItemId;
+    let action = rawAction;
+    let tone = null;
+
+    if (typeof rawAction === 'string' && rawAction.startsWith('changeTone::')) {
+      action = 'changeTone';
+      tone = rawAction.split('::')[1];
+    }
+
+    if (action !== MENU_IDS.FIX && action !== MENU_IDS.REWRITE && action !== 'changeTone') return;
 
     try {
       const settings = await Utils.getSettings();
@@ -82,13 +116,15 @@ importScripts(
       await sendToContent(tab.id, { action: 'saveSelection' });
       await sendToContent(tab.id, { action: 'showLoading' });
 
+      extraConfig.tone = tone;
       const result = await AIAPI.callAI(provider, action, text, apiKey, model, extraConfig);
 
       await sendToContent(tab.id, {
         action: 'showResult',
         original: text,
         corrected: result,
-        menuItemId: action
+        menuItemId: action,
+        tone
       });
     } catch (err) {
       await sendToContent(tab.id, {
@@ -119,7 +155,7 @@ importScripts(
     }
 
     if (message.action === 'processText') {
-      processText(message.text, message.menuItemId)
+      processText(message.text, message.menuItemId, message.tone)
         .then(result => sendResponse({ result }))
         .catch(err => sendResponse({ error: err.message }));
       return true;
@@ -135,7 +171,7 @@ importScripts(
     }
   });
 
-  async function processText(text, menuItemId) {
+  async function processText(text, menuItemId, tone) {
     console.log('[Lexi] processText:', menuItemId, 'text:', text);
     if (!text || !menuItemId) throw new Error('Missing text or action');
 
@@ -155,6 +191,7 @@ importScripts(
       throw new Error(`No API key configured for ${provider}. Please add one in extension settings.`);
     }
 
+    extraConfig.tone = tone;
     return AIAPI.callAI(provider, menuItemId, text, apiKey, model, extraConfig);
   }
 
