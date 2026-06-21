@@ -44,14 +44,18 @@ export default function ResultCard({ original, corrected, action, tone, instruct
     if (!info) return { top: '50%', left: '50%', transform: 'translate(-50%,-50%)' };
     if (info.type === 'input' || info.type === 'textarea') {
       const r = info.element.getBoundingClientRect();
-      return { top: Math.min(r.bottom + 8, window.innerHeight - 340), left: Math.max(8, r.left + 8) };
+      const t = Math.min(r.bottom + 8, window.innerHeight - 400);
+      if (t < 8) return { top: '50%', left: '50%', transform: 'translate(-50%,-50%)' };
+      return { top: t, left: Math.max(8, r.left + 8) };
     }
     if (info.range) {
       const r = info.range.getBoundingClientRect();
       let t = r.bottom + 8;
       let l = r.left;
-      if (t + 340 > window.innerHeight) t = Math.max(8, r.top - 340);
-      if (l + 400 > window.innerWidth - 16) l = Math.max(8, window.innerWidth - 416);
+      if (t + 400 > window.innerHeight) t = r.top - 400;
+      if (t < 8 || l + 400 > window.innerWidth - 16) {
+        return { top: '50%', left: '50%', transform: 'translate(-50%,-50%)' };
+      }
       return { top: Math.max(8, t), left: Math.max(8, l) };
     }
     return { top: '50%', left: '50%', transform: 'translate(-50%,-50%)' };

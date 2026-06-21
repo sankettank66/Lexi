@@ -29,6 +29,7 @@ export default function App() {
   const [action, setAction] = useState(null);
   const [selectedTone, setSelectedTone] = useState(null);
   const [instruction, setInstruction] = useState(null);
+  const [resumeInstruction, setResumeInstruction] = useState(null);
   const [corrected, setCorrected] = useState('');
   const [original, setOriginal] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
@@ -182,6 +183,11 @@ export default function App() {
 
   const doRefix = useCallback(() => {
     if (!corrected || processing) return;
+    if (action === 'custom') {
+      setResumeInstruction(instruction);
+      setPhase(PHASES.DOT);
+      return;
+    }
     processing = true;
     setOriginal(corrected);
     setPhase(PHASES.LOADING);
@@ -205,7 +211,9 @@ export default function App() {
             onFix={() => doAction('fix')}
             onRewrite={() => doAction('rewrite')}
             onChangeTone={(tone) => doAction('changeTone', tone)}
-            onAskAI={(instr) => doAction('custom', null, instr)} />
+            onAskAI={(instr) => doAction('custom', null, instr)}
+            resumeInstruction={resumeInstruction}
+            onClearResume={() => setResumeInstruction(null)} />
         )}
         {phase === PHASES.RESULT && (
           <ResultCard original={original} corrected={corrected} action={action} tone={selectedTone} instruction={instruction}
@@ -250,13 +258,22 @@ const loadingPhrases = [
   'Applying your changes…',
 ];
 
-const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChangeTone, onAskAI, loading }, ref) {
+const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChangeTone, onAskAI, loading, resumeInstruction, onClearResume }, ref) {
   const [open, setOpen] = useState(false);
   const [toneOpen, setToneOpen] = useState(false);
   const [customMode, setCustomMode] = useState(false);
   const [customInput, setCustomInput] = useState('');
   const [loadingPhrase, setLoadingPhrase] = useState('');
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (resumeInstruction) {
+      setOpen(true);
+      setCustomMode(true);
+      setCustomInput(resumeInstruction);
+      onClearResume();
+    }
+  }, [resumeInstruction]);
 
   useEffect(() => {
     if (!open) return;
@@ -285,21 +302,38 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
     }
   }, [customMode]);
 
-  const tooltipAbove = y - 130 >= 8;
-  const submenuRight = x + 190 > window.innerWidth - 16;
+  const MARGIN = 8;
+  const TOOLS_W = 196, TOOLS_H = 215, CUSTOM_W = 248, CUSTOM_H = 155, LOADING_H = 40;
+
+  const calcPos = (w, h) => {
+    let left = x - w / 2;
+    left = Math.max(MARGIN, Math.min(left, window.innerWidth - w - MARGIN));
+    const below = y + 28 + h + 10 <= window.innerHeight - MARGIN;
+    const top = below ? y + 28 + 10 : y - h - 10;
+    return { left, top, below };
+  };
+
+  const toolsPos = calcPos(TOOLS_W, TOOLS_H);
+  const customPos = calcPos(CUSTOM_W, CUSTOM_H);
+  const loadingPos = calcPos(200, LOADING_H);
+
+  const submenuLeft = toolsPos.left + TOOLS_W + 6;
+  const submenuRight = submenuLeft + 155 > window.innerWidth - MARGIN;
 
   const handleSend = () => {
     const val = customInput.trim();
     if (!val) return;
     setCustomInput('');
     setCustomMode(false);
+    setOpen(false);
+    if (onClearResume) onClearResume();
     onAskAI(val);
   };
 
   return (
     <div ref={ref} style={{ position: 'fixed', left: x, top: y, zIndex: 2147483647 }}>
       <div
-        onClick={loading ? undefined : () => { setOpen(v => !v); setCustomMode(false); setCustomInput(''); }}
+        onClick={loading ? undefined : () => { setOpen(v => !v); setCustomMode(false); setCustomInput(''); if (onClearResume) onClearResume(); }}
         className={loading ? 'animate-ai-glass-loading-pulse' : ''}
         style={{
           width: 28, height: 28, borderRadius: '50%',
@@ -330,10 +364,7 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
       {/* Loading tooltip with cycling phrases */}
       {loading && (
         <div className="ai-glass-tooltip animate-ai-glass-enter" style={{
-          position: 'absolute',
-          left: '50%', transform: 'translateX(-50%)',
-          [tooltipAbove ? 'bottom' : 'top']: '100%',
-          [tooltipAbove ? 'marginBottom' : 'marginTop']: 10,
+          position: 'fixed', left: loadingPos.left, top: loadingPos.top,
           borderRadius: 10, padding: '8px 14px',
           whiteSpace: 'nowrap',
         }}>
@@ -346,11 +377,8 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
       {/* Tools tooltip */}
       {!loading && open && !customMode && (
         <div className="ai-glass-tooltip animate-ai-glass-enter" style={{
-          position: 'absolute',
-          left: '50%', transform: 'translateX(-50%)',
-          [tooltipAbove ? 'bottom' : 'top']: '100%',
-          [tooltipAbove ? 'marginBottom' : 'marginTop']: 10,
-          borderRadius: 14, padding: 8, width: 196,
+          position: 'fixed', left: toolsPos.left, top: toolsPos.top,
+          borderRadius: 14, padding: 8, width: TOOLS_W,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 10px 8px', borderBottom: '1px solid rgba(255,255,255,0.03)', marginBottom: 4 }}>
             <Logo width={14} height={14} style={{ opacity: 0.45, flexShrink: 0 }} />
@@ -446,11 +474,8 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
       {/* Custom input mode */}
       {!loading && open && customMode && (
         <div className="ai-glass-tooltip animate-ai-glass-enter" style={{
-          position: 'absolute',
-          left: '50%', transform: 'translateX(-50%)',
-          [tooltipAbove ? 'bottom' : 'top']: '100%',
-          [tooltipAbove ? 'marginBottom' : 'marginTop']: 10,
-          borderRadius: 14, padding: 10, width: 248,
+          position: 'fixed', left: customPos.left, top: customPos.top,
+          borderRadius: 14, padding: 10, width: CUSTOM_W,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 2px 8px', borderBottom: '1px solid rgba(255,255,255,0.03)', marginBottom: 10 }}>
             <Logo width={14} height={14} style={{ opacity: 0.45, flexShrink: 0 }} />
