@@ -1,17 +1,18 @@
 # Lexi - AI Writing Assistant
 
-A browser extension that fixes and rewrites selected text using AI-powered language models. Supports **5 AI providers** with a pluggable architecture.
+A browser extension that fixes, rewrites, and changes the tone of selected text using AI-powered language models. Supports **5 AI providers** with a pluggable architecture.
 
 ## Features
 
 - **Fix** - Correct grammar, spelling, punctuation, and word choice
 - **Rewrite** - Improve clarity, flow, and readability while preserving meaning
+- **Change Tone** - Rewrite text in a Professional, Casual, Formal, Friendly, or Concise tone via hover submenu
 - **5 AI Providers** - OpenRouter, Gemini, OpenAI, NVIDIA, Ollama (local)
-- **Floating Dot** - Sparkle trigger near selected text; click for Fix / Rewrite options
-- **Result Card** - Shows original vs. corrected text with Accept / Decline / Fix Again
-- **Apple Glass UI** - Frosted glassmorphism with 50px backdrop blur
+- **Floating Dot** - Blue glass dot near selected text; click for Fix / Rewrite / Change Tone options
+- **Result Card** - Shows original vs. corrected text with Accept / Decline / Again actions
+- **Apple Glass UI** - Frosted glassmorphism with 50px backdrop blur and entrance animations
 - **Secure** - API keys stored locally in `chrome.storage.local` (never synced)
-- **React + Tailwind** - Built with React and Tailwind CSS for a polished UI
+- **React + Tailwind** - Built with React 19 and Tailwind CSS v4 for a polished UI
 
 ## Architecture
 
@@ -98,14 +99,21 @@ npm run build      # Build content UI to dist/
 
 ## Usage
 
+### Inline Dot
+
 1. Select text on any webpage
-2. Right-click → **Lexi** → **Fix** or **Rewrite**
-3. Wait for the AI response (spinner + cycling status)
-4. Review the result in the overlay card
-5. Choose:
+2. A blue glass dot appears near the selection
+3. Click the dot → choose **Fix**, **Rewrite**, or hover **Change Tone** to pick a tone
+4. Wait for the AI response (spinner with cycling status phrases)
+5. Review the result in the overlay card
+6. Choose:
    - **Accept** - replaces the selected text
-   - **Fix Again** / **Rewrite Again** - re-sends the corrected text
+   - **Again** - re-sends the corrected text for another pass
    - **Decline** - dismisses the card
+
+### Right-Click Menu
+
+1. Select text, right-click → **Lexi** → **Fix**, **Rewrite**, or **Change Tone** > choose a tone
 
 ## Development
 
@@ -113,33 +121,35 @@ npm run build      # Build content UI to dist/
 lexi-chrome-ext/
 ├── manifest.json              # Extension manifest (MV3)
 ├── background.js              # Service worker: context menus, message routing
-├── options.html               # Settings page (glassmorphism dashboard)
-├── options.js                 # Settings page logic
-├── popup.html                 # Extension popup (glass panel)
-├── popup.js                   # Extension popup logic
+├── AGENTS.md                  # Agent instructions (versioning, design refs)
 ├── design.md                  # Design system documentation
+├── GLASS.md                   # Glassmorphism design skill reference
 ├── package.json               # Build scripts and dependencies
 ├── vite.config.js             # Vite build config
 ├── .github/workflows/build.yml # CI/CD pipeline
+├── .opencode/skills/glass/    # OpenCode glass design skill
+├── .agents/skills/glass/      # Agent glass design skill
 ├── src/
-│   └── content/               # React + Tailwind content script UI
-│       ├── main.jsx           # Entry point (Shadow DOM injection)
-│       ├── App.jsx            # Main state machine component
-│       ├── index.css          # Tailwind + Apple glass animations
-│       └── components/
-│           └── ResultCard.jsx  # Result card with Gemini entrance
-├── lib/                       # AI provider library
-│   ├── api.js                 # Provider registry and factory
-│   ├── utils.js               # Storage helpers and utilities
-│   └── providers/
-│       ├── base.js            # Abstract base provider
-│       ├── openrouter.js      # OpenRouter integration
-│       ├── gemini.js          # Google Gemini integration
-│       ├── openai.js          # OpenAI integration
-│       ├── nvidia.js          # NVIDIA integration
-│       └── ollama.js          # Ollama local integration
-├── dist/                      # Built output (npm run build)
-│   └── content.js             # Bundled content script + inlined CSS
+│   ├── content/               # React + Tailwind content script UI
+│   │   ├── main.jsx           # Entry point (Shadow DOM injection)
+│   │   ├── App.jsx            # Main state machine + InlineDot component
+│   │   ├── index.css          # Tailwind + Apple glass animations + classes
+│   │   └── components/
+│   │       ├── Logo.jsx        # Lexi logo SVG component
+│   │       └── ResultCard.jsx  # Result card with tone-aware labels
+│   ├── popup/                 # Quick-switch popup
+│   ├── options/               # Settings page (glassmorphism dashboard)
+│   └── lib/                   # AI provider library
+│       ├── api.js             # Provider registry and factory
+│       ├── utils.js           # Storage helpers and utilities
+│       └── providers/
+│           ├── base.js        # Abstract base provider (fix, rewrite, changeTone)
+│           ├── openrouter.js  # OpenRouter integration
+│           ├── gemini.js      # Google Gemini integration
+│           ├── openai.js      # OpenAI integration
+│           ├── nvidia.js      # NVIDIA integration
+│           └── ollama.js      # Ollama local integration
+├── dist/                      # Built output (gitignored; run npm run build)
 └── icons/                     # Extension icons
 ```
 
