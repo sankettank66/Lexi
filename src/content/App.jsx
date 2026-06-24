@@ -350,20 +350,20 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
         style={{
           width: 28, height: 28, borderRadius: '50%',
           background: loading
-            ? (pageTheme === 'light' ? 'rgba(59,130,246,0.35)' : 'rgba(59,130,246,0.22)')
-            : (pageTheme === 'light' ? 'rgba(59,130,246,0.28)' : 'rgba(59,130,246,0.16)'),
-          backdropFilter: 'blur(50px)',
-          WebkitBackdropFilter: 'blur(50px)',
+            ? (pageTheme === 'light' ? 'rgba(25,23,33,0.85)' : 'rgba(50,48,58,0.6)')
+            : (pageTheme === 'light' ? 'rgba(25,23,33,0.75)' : 'rgba(50,48,58,0.5)'),
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
           border: '1px solid rgba(255,255,255,0.06)',
           cursor: loading ? 'default' : 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           transition: 'transform 0.2s cubic-bezier(0.16,1,0.3,1), box-shadow 0.2s ease',
           boxShadow: loading
-            ? '0 0 20px rgba(59,130,246,0.25), 0 2px 12px rgba(0,0,0,0.35)'
-            : '0 2px 12px rgba(0,0,0,0.35)',
+            ? '0 0 20px rgba(59,130,246,0.25), 0 2px 12px rgba(0,0,0,0.35), inset 0 0.5px 0 rgba(255,255,255,0.08)'
+            : '0 2px 12px rgba(0,0,0,0.35), inset 0 0.5px 0 rgba(255,255,255,0.08)',
         }}
-        onMouseEnter={loading ? undefined : e => { e.currentTarget.style.transform = 'scale(1.2)'; e.currentTarget.style.boxShadow = '0 0 24px rgba(59,130,246,0.3), 0 2px 8px rgba(0,0,0,0.35)'; }}
-        onMouseLeave={loading ? undefined : e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.35)'; }}
+        onMouseEnter={loading ? undefined : e => { e.currentTarget.style.transform = 'scale(1.2)'; e.currentTarget.style.boxShadow = '0 0 24px rgba(59,130,246,0.3), 0 2px 8px rgba(0,0,0,0.35), inset 0 0.5px 0 rgba(255,255,255,0.08)'; }}
+        onMouseLeave={loading ? undefined : e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.35), inset 0 0.5px 0 rgba(255,255,255,0.08)'; }}
         onMouseDown={loading ? undefined : e => e.currentTarget.style.transform = 'scale(0.9)'}
         onMouseUp={loading ? undefined : e => e.currentTarget.style.transform = 'scale(1.2)'}
         aria-label={loading ? `Lexi - ${loadingPhrase}` : 'Lexi - AI Writing Assistant'}>
@@ -407,8 +407,10 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
               background: 'transparent', border: 'none', cursor: 'pointer',
               transition: 'all 0.15s', textAlign: 'left',
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '16px'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.88)'; e.currentTarget.style.paddingLeft = '12px'; }}>
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '16px'; e.currentTarget.style.transform = 'scale(1)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.88)'; e.currentTarget.style.paddingLeft = '12px'; e.currentTarget.style.transform = 'scale(1)'; }}
+            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+            onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}>
             Fix
           </button>
 
@@ -420,8 +422,10 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
               background: 'transparent', border: 'none', cursor: 'pointer',
               transition: 'all 0.15s', textAlign: 'left',
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '16px'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.88)'; e.currentTarget.style.paddingLeft = '12px'; }}>
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '16px'; e.currentTarget.style.transform = 'scale(1)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.88)'; e.currentTarget.style.paddingLeft = '12px'; e.currentTarget.style.transform = 'scale(1)'; }}
+            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+            onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}>
             Rewrite
           </button>
 
@@ -430,8 +434,10 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
             onMouseLeave={() => { toneLeaveRef.current = setTimeout(() => setToneOpen(false), 120); }}>
             <button
               onClick={() => { if (toneLeaveRef.current) clearTimeout(toneLeaveRef.current); setToneOpen(v => !v); }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '16px'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = toneOpen ? 'rgba(59,130,246,0.1)' : 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.88)'; e.currentTarget.style.paddingLeft = '12px'; }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '16px'; e.currentTarget.style.transform = 'scale(1)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = toneOpen ? 'rgba(59,130,246,0.1)' : 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.88)'; e.currentTarget.style.paddingLeft = '12px'; e.currentTarget.style.transform = 'scale(1)'; }}
+              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+              onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
               style={{
                 width: '100%', display: 'flex', alignItems: 'center',
                 padding: '9px 12px', borderRadius: 10,
@@ -464,8 +470,10 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
                       background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left',
                       transition: 'all 0.15s',
                     }}
-                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '14px'; }}
-                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.82)'; e.currentTarget.style.paddingLeft = '10px'; }}>
+                    onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '14px'; e.currentTarget.style.transform = 'scale(1)'; }}
+                    onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.82)'; e.currentTarget.style.paddingLeft = '10px'; e.currentTarget.style.transform = 'scale(1)'; }}
+                    onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+                    onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}>
                     {t.label}
                   </button>
                 ))}
@@ -481,8 +489,10 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
               background: 'transparent', border: 'none', cursor: 'pointer',
               transition: 'all 0.15s', textAlign: 'left',
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '16px'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.88)'; e.currentTarget.style.paddingLeft = '12px'; }}>
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,130,246,0.1)'; e.currentTarget.style.color = '#fff'; e.currentTarget.style.paddingLeft = '16px'; e.currentTarget.style.transform = 'scale(1)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.88)'; e.currentTarget.style.paddingLeft = '12px'; e.currentTarget.style.transform = 'scale(1)'; }}
+            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+            onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}>
             Ask AI
           </button>
         </div>
@@ -522,8 +532,10 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
                 background: 'transparent', border: 'none', cursor: 'pointer',
                 transition: 'all 0.15s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.85)'; }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; }}>
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.85)'; e.currentTarget.style.transform = 'scale(1)'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.55)'; e.currentTarget.style.transform = 'scale(1)'; }}
+              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+              onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}>
               Back
             </button>
             <button onClick={handleSend}
@@ -536,8 +548,10 @@ const InlineDot = forwardRef(function InlineDot({ x, y, onFix, onRewrite, onChan
                 cursor: customInput.trim() ? 'pointer' : 'default',
                 transition: 'all 0.15s',
               }}
-              onMouseEnter={e => { if (customInput.trim()) { e.currentTarget.style.background = 'rgba(59,130,246,0.4)'; } }}
-              onMouseLeave={e => { if (customInput.trim()) { e.currentTarget.style.background = 'rgba(59,130,246,0.25)'; } }}>
+              onMouseEnter={e => { if (customInput.trim()) { e.currentTarget.style.background = 'rgba(59,130,246,0.4)'; e.currentTarget.style.transform = 'scale(1)'; } }}
+              onMouseLeave={e => { if (customInput.trim()) { e.currentTarget.style.background = 'rgba(59,130,246,0.25)'; e.currentTarget.style.transform = 'scale(1)'; } }}
+              onMouseDown={e => { if (customInput.trim()) e.currentTarget.style.transform = 'scale(0.97)'; }}
+              onMouseUp={e => { if (customInput.trim()) e.currentTarget.style.transform = 'scale(1)'; }}>
               Send
             </button>
           </div>
@@ -573,10 +587,12 @@ function ErrorCard({ message, onClose, pageTheme }) {
               padding: '8px 16px', borderRadius: 8, fontSize: 12, fontWeight: 500,
               color: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.03)',
               cursor: 'pointer', background: 'transparent',
-              transition: 'background 0.15s, color 0.15s',
+              transition: 'all 0.15s',
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; }}>
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.8)'; e.currentTarget.style.transform = 'scale(1)'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.5)'; e.currentTarget.style.transform = 'scale(1)'; }}
+            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+            onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}>
             Close
           </button>
         </div>

@@ -4,6 +4,25 @@ All notable changes to the Lexi extension are documented here.
 
 ---
 
+## v1.5.0 - Apple-Inspired Glass Refinements
+
+- **feat(ui):** Add specular highlight (`inset 0 0.5px`) to all glass surfaces
+  for a dimensional Apple-style edge-light effect
+- **feat(ui):** Add press-scale (`transform: scale(0.97)`) on all tooltip
+  buttons for tactile interaction feedback
+- **fix(ui):** Lighten dark-mode glass backgrounds (base 40->55, tooltip
+  35->50) so frosted surfaces are clearly visible against dark pages
+- **fix(ui):** Remove blue tint from dot background — uses neutral warm-dark
+  glass matching other tooltip surfaces
+- **fix(ui):** Reduce dot blur from 50px to 20px (Apple: small controls = light
+  blur for icon clarity)
+- **fix(ui):** Align popup glass-panel and header-icon with the same updated
+  design tokens and specular highlight
+- **fix(ui):** Restrict dot activation to input, textarea, and contenteditable
+  elements only
+
+---
+
 ## v1.4.0 - Ask AI & Theme-Aware Glass
 
 - **feat(ui):** Add Ask AI mode with inline text input for custom instructions
