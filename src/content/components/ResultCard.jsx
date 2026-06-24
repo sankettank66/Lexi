@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Logo from './Logo.jsx';
 
 const ACCENT = '#3b82f6';
@@ -18,6 +18,9 @@ const btnGlass = {
 
 export default function ResultCard({ original, corrected, action, tone, instruction, onAccept, onDecline, onRefix, selInfo, pageTheme }) {
   const cardRef = useRef(null);
+  const [cardPos, setCardPos] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef({ startX: 0, startY: 0, startTop: 0, startLeft: 0 });
 
   const isRewrite = action === 'rewrite';
   const isChangeTone = action === 'changeTone';
@@ -62,23 +65,53 @@ export default function ResultCard({ original, corrected, action, tone, instruct
     return { top: '50%', left: '50%', transform: 'translate(-50%,-50%)' };
   };
 
-  const pos = getPos();
+  const handleDragStart = (e) => {
+    if (e.button !== 0) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const startTop = cardPos ? cardPos.top : rect.top;
+    const startLeft = cardPos ? cardPos.left : rect.left;
+    dragRef.current = { startX: e.clientX, startY: e.clientY, startTop, startLeft };
+    if (!cardPos) setCardPos({ top: startTop, left: startLeft });
+    setIsDragging(true);
+  };
+
+  useEffect(() => {
+    if (!isDragging) return;
+    const onMove = (e) => {
+      const dx = e.clientX - dragRef.current.startX;
+      const dy = e.clientY - dragRef.current.startY;
+      const rect = cardRef.current.getBoundingClientRect();
+      const cw = rect.width;
+      const ch = rect.height;
+      let top = dragRef.current.startTop + dy;
+      let left = dragRef.current.startLeft + dx;
+      top = Math.max(-ch + 40, Math.min(top, window.innerHeight - 8));
+      left = Math.max(8, Math.min(left, window.innerWidth - cw - 8));
+      setCardPos({ top, left });
+    };
+    const onUp = () => setIsDragging(false);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+    return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
+  }, [isDragging]);
+
+  const autoPos = getPos();
+  const pos = cardPos || autoPos;
+  const animClass = !cardPos ? 'animate-ai-glass-enter' : '';
 
   return (
     <div ref={cardRef}
-      className={`${pageTheme === 'light' ? 'ai-glass-elevated-light' : 'ai-glass-elevated'} animate-ai-glass-enter`}
+      className={`${pageTheme === 'light' ? 'ai-glass-elevated-light' : 'ai-glass-elevated'} ${animClass} ${isDragging ? 'transition-none' : ''}`}
       style={{
         ...pos, position: 'fixed', zIndex: 2147483647,
         width: 400, maxWidth: 'calc(100vw - 32px)', maxHeight: 'calc(100vh - 32px)',
         borderRadius: 16, overflow: 'hidden',
       }}>
       {/* Header */}
-      <div className={`${pageTheme === 'light' ? 'ai-glass-header-light' : 'ai-glass-header'}`} style={{
-        display: 'flex', alignItems: 'center', gap: 10,
-        padding: '12px 16px',
-      }}>
+      <div className={`${pageTheme === 'light' ? 'ai-glass-header-light' : 'ai-glass-header'} flex items-center gap-2.5 px-4 py-3 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} select-none`}
+        onMouseDown={handleDragStart}>
         <Logo width={14} height={14} style={{ opacity: pageTheme === 'light' ? 0.65 : 0.45, flexShrink: 0 }} />
-        <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+        <span title={titleLabel} className="truncate flex-1 min-w-0" style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
           {titleLabel}
         </span>
       </div>
