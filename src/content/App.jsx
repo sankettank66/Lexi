@@ -101,14 +101,14 @@ export default function App() {
       const sel = window.getSelection();
       text = sel?.toString()?.trim();
       if (!text) { setPhase(PHASES.IDLE); return; }
+      let node = sel.anchorNode;
+      if (node?.nodeType === 3) node = node.parentElement;
+      const isEditable = node?.closest?.('[contenteditable]') !== null;
+      if (!isEditable) { setPhase(PHASES.IDLE); return; }
       const range = sel.getRangeAt(0);
       rect = range.getBoundingClientRect();
       if (!rect.width && !rect.height) return;
-      if (active?.isContentEditable) {
-        info = { type: 'contenteditable', element: active, range: range.cloneRange(), text };
-      } else {
-        info = { type: 'textNode', range: range.cloneRange(), text };
-      }
+      info = { type: 'contenteditable', element: node?.closest?.('[contenteditable]'), range: range.cloneRange(), text };
     }
 
     selRef.current = info;
